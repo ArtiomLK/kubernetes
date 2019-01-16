@@ -27,12 +27,23 @@
 | `kubectl get endpoints`                                      | List all endpoints                                                           |
 | `kubectl get ingress`                                        | List all ingress                                                             |
 | `kubectl get componentstatuses`                              | Displays the health status of the components                                 |
-| `kubectl get namespaces`                                     | Display namespaces                                                           |
+| `kubectl get namespaces`                                     | List namespaces                                                              |
+| `kubectl get rs`                                             | List Replica Resources                                                       |
+| `kubectl get sa`                                             | List Service Accounts                                                        |
+| `kubectl get clusterroles`                                   | List default Cluster Roles                                                   |
+| `kubectl get rol`                                            | List Roles                                                                   |
 | `kubectl describe pod {POD_NAME}`                            | Describes a specific pod                                                     |
 | `kubectl describe node {NODE_NAME}`                          | Describes the status of a specific Node, CPU and memory (system information) |
+| `kubectl describe rs {REPLICA_SET_NAME}`                     | Describe a specific ReplicaSet                                               |
+| `kubectl describe sa {SERVICE_ACCOUNT_NAME}`                 | Describe a specific Service Account                                          |
+| `kubectl describe secret {SECRET_NAME}`                      | Describe a secret/Token                                                      |
+| `kubectl  describe rolebinding {ROLE_BINDING_NAME}`          | Describe a specific Role Binding                                             |
 | `kubectl delete pod {POD_NAME}`                              | deletes the specified pod                                                    |
 | `kubectl delete namespaces {NAMESPACE_NAME}`                 | delete a specific namespace                                                  |
 | `kubectl delete deploy {DEPLOY_NAME}`                        | deletes a specific deployment                                                |
+| `kubectl delete sa {SERVICE_ACCOUNT_NAME}`                   | deletes a specific service account                                           |
+| `kubectl delete rol {ROLE_NAME}`                             | deletes a specific role                                                      |
+| `kubectl delete rolebinding  {ROLE_BINDING_NAME}`            | deletes a specific role binding                                              |
 | `kubectl expose deployment {DEPLOY_NAME} --type="ClusterIP"` | exposes an external IP address                                               |
 | `kubectl top node `                                          | Display Resource (CPU/Memory/Storage) usage of nodes                         |
 
