@@ -22,7 +22,7 @@
 | Command                                                      | Description                                                                  |
 | ------------------------------------------------------------ | ---------------------------------------------------------------------------- |
 | `kubectl create -f [FILE/S]`                                 | Creates resources from the given file, files, dir, url, [etc][2]             |
-| `kubectl get pods`                                           | Lists all Pods. [`Viewing Finding Resourses`](#Viewing-Finding-Resourses)    |
+| `kubectl get pods \| pod \| po`                              | Lists all Pods. [`Viewing Finding Resourses`](#Viewing-Finding-Resourses)    |
 | `kubectl get nodes`                                          | Lists all nodes, [`Viewing Finding Resourses`](#Viewing-Finding-Resourses)   |
 | `kubectl get svc \| services`                                | Lists all services in the namespace                                          |
 | `kubectl get deploy`                                         | Lists deployments                                                            |
