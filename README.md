@@ -22,7 +22,7 @@
 | `kubectl create -f [FILE/S]`                                 | creates resources from the given file, files, dir, url, [etc][2]             |
 | `kubectl get pods`                                           | Lists all Pods. [`Viewing Finding Resourses`](#Viewing-Finding-Resourses)    |
 | `kubectl get nodes`                                          | List all nodes, [`Viewing Finding Resourses`](#Viewing-Finding-Resourses)    |
-| `kubectl get svc`                                            | List all services in the namespace                                           |
+| `kubectl get services | svc`                                 | List all services in the namespace                                           |
 | `kubectl get deploy`                                         | List deployments                                                             |
 | `kubectl get endpoints`                                      | List all endpoints                                                           |
 | `kubectl get ingress`                                        | List all ingress                                                             |
@@ -39,9 +39,9 @@
 | `kubectl describe rs {REPLICA_SET_NAME}`                     | Describe a specific ReplicaSet                                               |
 | `kubectl describe sa {SERVICE_ACCOUNT_NAME}`                 | Describe a specific Service Account                                          |
 | `kubectl describe secret {SECRET_NAME}`                      | Describe a secret/Token                                                      |
-| `kubectl  describe rolebinding {ROLE_BINDING_NAME}`          | Describe a specific role binding                                             |
-| `kubectl  describe pv {PERSISTENT_VOLUME_NAME}`              | Describe a specific persistent volume                                      |
-| `kubectl  describe pv {PERSISTENT_VOLUME_CLAIMS_NAME}`       | Describe a specific persistent volume claim                                  |
+| `kubectl describe rolebinding {ROLE_BINDING_NAME}`           | Describe a specific role binding                                             |
+| `kubectl describe pv {PERSISTENT_VOLUME_NAME}`               | Describe a specific persistent volume                                        |
+| `kubectl describe pv {PERSISTENT_VOLUME_CLAIMS_NAME}`        | Describe a specific persistent volume claim                                  |
 | `kubectl delete pod {POD_NAME}`                              | deletes the specified pod                                                    |
 | `kubectl delete namespaces {NAMESPACE_NAME}`                 | delete a specific namespace                                                  |
 | `kubectl delete deploy {DEPLOY_NAME}`                        | deletes a specific deployment                                                |
@@ -51,7 +51,19 @@
 | `kubectl delete pv  {PV_NAME}`                               | deletes a specific persistent volume                                         |
 | `kubectl delete pvc  {PVC_NAME}`                             | deletes a specific persistent volume claim                                   |
 | `kubectl expose deployment {DEPLOY_NAME} --type="ClusterIP"` | exposes an external IP address                                               |
-| `kubectl top node `                                          | Display Resource (CPU/Memory/Storage) usage of nodes                         |
+| `kubectl top node`                                           | Display Resource (CPU/Memory/Storage) usage of nodes                         |  |
+| `kubectl proxy`                                              | This command starts a proxy to the Kubernetes API server                     |  |
+
+### Helm
+| Command                          | Description                                                                                                        |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `helm init`                      | This will install Tiller to your running Kubernetes cluster. It will also set up any necessary local configuration |
+| `helm repo update`               | updates index chart repositories                                                                                   |
+| `helm search {CHART_NAME}`       | searches for a specific chart                                                                                      |
+| `helm install {CHART_REFERENCE}` | installs a specific chart. E.g. `helm install stable/mariadb`                                                      |
+| `helm create {CHART_NAME}`       | create a new chart with the given name                                                                             |
+| `helm package {CHART_PATH}`      | package a chart directory into a chart archive                                                                     |
+| `helm delete {RELREASE_NAME}`    | given a release name, delete the release from Kubernetes                                                           |
 
 ### Viewing Finding Resourses:
 `kubectl get pods --all-namespaces` List all pods in all namespaces
