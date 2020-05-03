@@ -1,13 +1,13 @@
-# Kubernetes Lab Commands Sheet 
+# Kubernetes Lab Commands Sheet
 
-###  Juju
+### Juju
 
 | Command                           | Description                                                                                   |
 | --------------------------------- | --------------------------------------------------------------------------------------------- |
 | `juju status`                     | Reports the current status of the model, machines, applications and units                     |
 | `watch -c juju status --color`    | Tracks the deployment process live                                                            |
 | `juju deploy`                     | Deploys a new application or bundle                                                           |
-| `juju add-unit `                  | Adds one or more units to a deployed application                                              |
+| `juju add-unit`                   | Adds one or more units to a deployed application                                              |
 | `juju add-credential`             | Adds or replaces credentials for a cloud, stored locally on this client                       |
 | `juju list-credentials`           | Lists locally stored credentials for a cloud                                                  |
 | `juju add-model`                  | Adds a hosted model                                                                           |
@@ -16,8 +16,7 @@
 | `juju upgrade-charm {CHARM_NAME}` | Upgrade an application's charm                                                                |
 | `juju config {APPLICATION_NAME}`  | Gets, sets, or resets configuration for a deployed application                                |
 
-
-### Kubernetes 
+### Kubernetes
 
 | Command                                                      | Description                                                                  |
 | ------------------------------------------------------------ | ---------------------------------------------------------------------------- |
@@ -49,14 +48,15 @@
 | `kubectl delete deploy {DEPLOY_NAME}`                        | Deletes a specific deployment                                                |
 | `kubectl delete sa {SERVICE_ACCOUNT_NAME}`                   | Deletes a specific service account                                           |
 | `kubectl delete rol {ROLE_NAME}`                             | Deletes a specific role                                                      |
-| `kubectl delete rolebinding  {ROLE_BINDING_NAME}`            | Deletes a specific role binding                                              |
-| `kubectl delete pv  {PV_NAME}`                               | Deletes a specific persistent volume                                         |
-| `kubectl delete pvc  {PVC_NAME}`                             | Deletes a specific persistent volume claim                                   |
+| `kubectl delete rolebinding {ROLE_BINDING_NAME}`             | Deletes a specific role binding                                              |
+| `kubectl delete pv {PV_NAME}`                                | Deletes a specific persistent volume                                         |
+| `kubectl delete pvc {PVC_NAME}`                              | Deletes a specific persistent volume claim                                   |
 | `kubectl expose deployment {DEPLOY_NAME} --type="ClusterIP"` | Exposes an external IP address                                               |
 | `kubectl top node`                                           | Displays resource (CPU/Memory/Storage) usage of nodes                        |  |
 | `kubectl proxy`                                              | Starts a proxy to the Kubernetes API server                                  |  |
 
 ### Helm
+
 | Command                          | Description                                                                                              |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `helm init`                      | Install Tiller to your running Kubernetes cluster. It will also set up any necessary local configuration |
@@ -68,6 +68,7 @@
 | `helm delete {RELREASE_NAME}`    | Given a release name, delete the release from Kubernetes                                                 |
 
 ### Viewing Finding Resourses:
+
 `kubectl get pods --all-namespaces` List all pods in all namespaces
 
 `kubectl get pods -o wide` List all pods in the namespace, with more details
