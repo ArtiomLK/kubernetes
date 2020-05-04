@@ -3,8 +3,8 @@
 - [`create`](#Comando-create)
 - [`get`](#Comando-get)
 - [`describe`](#Comando-describe)
-- [`delete`](#Delete-Commands)
-- [`config`](#Config-Commands)
+- [`delete`](#Comando-delete)
+- [`config`](#Comando-config)
 
 ## Comando create
 
