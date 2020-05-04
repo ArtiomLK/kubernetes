@@ -8,9 +8,10 @@
 
 ## Comando create
 
-| Comando                      | Descripción                                                  |
-| ---------------------------- | ------------------------------------------------------------ |
-| `kubectl create -f {FILE/S}` | Crea los recursos detallados en el archivo, directorio o url |
+| Comando                                  | Descripción                                                  |
+| ---------------------------------------- | ------------------------------------------------------------ |
+| `kubectl create -f {FILE/S}`             | Crea los recursos detallados en el archivo, directorio o url |
+| `kubectl run {POD_NAME} --image={IMAGE}` | Crea y inicializa un pod de la imagen provista               |
 
 ## Comando get
 
