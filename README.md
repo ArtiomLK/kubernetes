@@ -1,39 +1,39 @@
 # kubectl Cheat Sheet
 
-- [`create`](#Create-Commands)
-- [`get`](#Get-Commands)
-- [`describe`](#Describe-Commands)
-- [`delete`](#Delete-Commands)
-- [`config`](#Config-Commands)
+- [`create`](#Create-Command)
+- [`get`](#Get-Command)
+- [`describe`](#Describe-Command)
+- [`delete`](#Delete-Command)
+- [`config`](#Config-Command)
 
-## Create Commands
+## Create Command
 
-| Command                      | Description                                                 |
-| ---------------------------- | ----------------------------------------------------------- |
-| `kubectl create -f {FILE/S}` | Creates resources from the given file, files, dir, url, etc |
+| Command                      | Description                                              |
+| ---------------------------- | -------------------------------------------------------- |
+| `kubectl create -f {FILE/S}` | Creates resources from the given file, files, dir or url |
 
-## Get Commands
+## Get Command
 
-| Command                                     | Description                                                                |
-| ------------------------------------------- | -------------------------------------------------------------------------- |
-| `kubectl get po \| pods`                    | Lists all Pods. [`Viewing Finding Resourses`](#Viewing-Finding-Resourses)  |
-| `kubectl get no \| nodes`                   | Lists all nodes, [`Viewing Finding Resourses`](#Viewing-Finding-Resourses) |
-| `kubectl get svc \| services`               | Lists all services in the namespace                                        |
-| `kubectl get deploy \| deployments`         | Lists deployments                                                          |
-| `kubectl get ep \| endpoints`               | Lists all endpoints                                                        |
-| `kubectl get ing \| ingress`                | Lists all ingress                                                          |
-| `kubectl get cs \| componentstatuses`       | Displays the health status of the components                               |
-| `kubectl get ns \| namespaces`              | Lists namespaces                                                           |
-| `kubectl get rs \| replicasets`             | Lists Replica Resources                                                    |
-| `kubectl get sa \| serviceaccounts`         | Lists Service Accounts                                                     |
-| `kubectl get clusterroles`                  | Lists default Cluster Roles                                                |
-| `kubectl get roles`                         | Lists Roles                                                                |
-| `kubectl get pv \| persistentvolumes`       | List persistent volumes                                                    |
-| `kubectl get pvc \| persistentvolumeclaims` | Lists persistent volume claims                                             |
-| `kubectl get secret`                        | Lists secrets/Tokens                                                       |
-| `kubectl get rolebinding`                   | Lists rolebinding                                                          |
+| Command                                     | Description                                     |
+| ------------------------------------------- | ----------------------------------------------- |
+| `kubectl get po \| pods`                    | Lists all pods. [`Common Flags`](#Common-Flags) |
+| `kubectl get no \| nodes`                   | Lists all nodes                                 |
+| `kubectl get svc \| services`               | Lists all services in the namespace             |
+| `kubectl get deploy \| deployments`         | Lists deployments                               |
+| `kubectl get ep \| endpoints`               | Lists all endpoints                             |
+| `kubectl get ing \| ingress`                | Lists all ingress                               |
+| `kubectl get cs \| componentstatuses`       | Displays the health status of the components    |
+| `kubectl get ns \| namespaces`              | Lists namespaces                                |
+| `kubectl get rs \| replicasets`             | Lists Replica Resources                         |
+| `kubectl get sa \| serviceaccounts`         | Lists Service Accounts                          |
+| `kubectl get clusterroles`                  | Lists default Cluster Roles                     |
+| `kubectl get roles`                         | Lists Roles                                     |
+| `kubectl get pv \| persistentvolumes`       | List persistent volumes                         |
+| `kubectl get pvc \| persistentvolumeclaims` | Lists persistent volume claims                  |
+| `kubectl get secret`                        | Lists secrets/Tokens                            |
+| `kubectl get rolebinding`                   | Lists rolebinding                               |
 
-## Describe Commands
+## Describe Command
 
 | Command                                                | Description                                                                  |
 | ------------------------------------------------------ | ---------------------------------------------------------------------------- |
@@ -46,7 +46,7 @@
 | `kubectl describe pv {PERSISTENT_VOLUME_NAME}`         | Describes a specific persistent volume                                       |
 | `kubectl describe pvc {PERSISTENT_VOLUME_CLAIMS_NAME}` | Describes a specific persistent volume claim                                 |
 
-## Delete Commands
+## Delete Command
 
 | Command                                          | Description                                |
 | ------------------------------------------------ | ------------------------------------------ |
@@ -59,23 +59,23 @@
 | `kubectl delete pv {PV_NAME}`                    | Deletes a specific persistent volume       |
 | `kubectl delete pvc {PVC_NAME}`                  | Deletes a specific persistent volume claim |
 
-## Config Commands
+## Config Command
 
-| Command                               | Description                                |
-| ------------------------------------- | ------------------------------------------ |
-| `kubectl get-contexts`                | display list of contexts                   |
-| `kubectl use-context my-cluster-name` | set the default context to my-cluster-name |
+| Command                                      | Description                                |
+| -------------------------------------------- | ------------------------------------------ |
+| `kubectl config get-contexts`                | display list of contexts                   |
+| `kubectl config use-context my-cluster-name` | set the default context to my-cluster-name |
 
 ## Other Commands
 
-| Command                                                      | Description                                           |
-| ------------------------------------------------------------ | ----------------------------------------------------- |
-| `kubectl expose deployment {DEPLOY_NAME} --type="ClusterIP"` | Exposes an external IP address                        |
-| `kubectl top node`                                           | Displays resource (CPU/Memory/Storage) usage of nodes |  |
-| `kubectl proxy`                                              | Starts a proxy to the Kubernetes API server           |  |
+| Command                                                      | Description                                 |
+| ------------------------------------------------------------ | ------------------------------------------- |
+| `kubectl expose deployment {DEPLOY_NAME} --type="ClusterIP"` | Exposes an external IP address              |
+| `kubectl proxy --port=8080`                                  | Starts a proxy to the Kubernetes API server |  |
 
-### Viewing Finding Resourses:
+### Common Flags:
 
-`kubectl get pods --all-namespaces` List all pods in all namespaces
-
-`kubectl get pods -o wide` List all pods in the namespace, with more details
+| Flag               | Examples                          | Description                                       |
+| ------------------ | --------------------------------- | ------------------------------------------------- |
+| `--all-namespaces` | `kubectl get po --all-namespaces` | List all pods in all namespaces                   |
+| `-o wide`          | `kubectl get pods -o wide`        | List all pods in the namespace, with more details |
