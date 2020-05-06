@@ -8,10 +8,11 @@
 
 ## Create Command
 
-| Command                                  | Description                                              |
-| ---------------------------------------- | -------------------------------------------------------- |
-| `kubectl create -f {FILE/S}`             | Creates resources from the given file, files, dir or url |
-| `kubectl run {POD_NAME} --image={IMAGE}` | Creates and starts a pod from the given image            |
+| Command                                     | Description                                              |
+| ------------------------------------------- | -------------------------------------------------------- |
+| `kubectl create -f {FILE/S}`                | Creates resources from the given file, files, dir or url |
+| `kubectl create namespace {NAMESPACE_NAME}` | Creates a new namespace                                  |
+| `kubectl run {POD_NAME} --image={IMAGE}`    | Creates and starts a pod from the given image            |
 
 ## Get Command
 
@@ -62,10 +63,12 @@
 
 ## Config Command
 
-| Command                                      | Description                                |
-| -------------------------------------------- | ------------------------------------------ |
-| `kubectl config get-contexts`                | display list of contexts                   |
-| `kubectl config use-context my-cluster-name` | set the default context to my-cluster-name |
+| Command                                                             | Description                       |
+| ------------------------------------------------------------------- | --------------------------------- |
+| `kubectl config get-contexts`                                       | display list of clusters          |
+| `kubectl config use-context {CLUSTER_NAME}`                         | changes the current cluster       |
+| `kubectl config view \| grep namespace`                             | displays current namespace in use |
+| `kubectl config set-context --current --namespace={NAMESPACE_NAME}` | changes the current namespace     |
 
 ## Other Commands
 

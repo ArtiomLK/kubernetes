@@ -8,10 +8,11 @@
 
 ## Comando create
 
-| Comando                                  | Descripción                                                  |
-| ---------------------------------------- | ------------------------------------------------------------ |
-| `kubectl create -f {FILE/S}`             | Crea los recursos detallados en el archivo, directorio o url |
-| `kubectl run {POD_NAME} --image={IMAGE}` | Crea y inicializa un pod de la imagen provista               |
+| Comando                                     | Descripción                                                  |
+| ------------------------------------------- | ------------------------------------------------------------ |
+| `kubectl create -f {FILE/S}`                | Crea los recursos detallados en el archivo, directorio o url |
+| `kubectl create namespace {NAMESPACE_NAME}` | Crea un namespace                                            |
+| `kubectl run {POD_NAME} --image={IMAGE}`    | Crea y inicializa un pod de la imagen provista               |
 
 ## Comando get
 
@@ -62,10 +63,12 @@
 
 ## Comando config
 
-| Comando                                      | Descripción                                            |
-| -------------------------------------------- | ------------------------------------------------------ |
-| `kubectl config get-contexts`                | Muestra todos los clusters                             |
-| `kubectl config use-context my-cluster-name` | Cambia el cluster en uso por defecto a my-cluster-name |
+| Comando                                                             | Descripción                 |
+| ------------------------------------------------------------------- | --------------------------- |
+| `kubectl config get-contexts`                                       | Muestra todos los clusters  |
+| `kubectl config use-context {CLUSTER_NAME}`                         | Cambia el cluster en uso    |
+| `kubectl config view \| grep namespace`                             | Muestra el namespace en uso |
+| `kubectl config set-context --current --namespace={NAMESPACE_NAME}` | Cambia el namespace en uso  |
 
 ## Otros Commandos
 
