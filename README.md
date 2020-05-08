@@ -75,7 +75,7 @@
 | Command                                                      | Description                                 |
 | ------------------------------------------------------------ | ------------------------------------------- |
 | `kubectl expose deployment {DEPLOY_NAME} --type="ClusterIP"` | Exposes an external IP address              |
-| `kubectl proxy --port=8080`                                  | Starts a proxy to the Kubernetes API server |  |
+| `kubectl proxy --port=8080`                                  | Starts a proxy to the Kubernetes API server |
 
 ### Common Flags:
 
