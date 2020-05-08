@@ -1,6 +1,7 @@
 # Commandos de kubectl
 
 - [`create`](#Comando-create)
+- [`edit`](#Comando-edit)
 - [`get`](#Comando-get)
 - [`describe`](#Comando-describe)
 - [`delete`](#Comando-delete)
@@ -13,6 +14,12 @@
 | `kubectl create -f {FILE/S}`                | Crea los recursos detallados en el archivo, directorio o url |
 | `kubectl create namespace {NAMESPACE_NAME}` | Crea un namespace                                            |
 | `kubectl run {POD_NAME} --image={IMAGE}`    | Crea y inicializa un pod de la imagen provista               |
+
+## Comando edit
+
+| Comando                      | Descripción                |
+| ---------------------------- | -------------------------- |
+| `kubectl edit po {POD_NAME}` | Modifica el pod mencionado |
 
 ## Comando get
 

@@ -1,6 +1,7 @@
 # kubectl Cheat Sheet
 
 - [`create`](#Create-Command)
+- [`edit`](#Edit-Command)
 - [`get`](#Get-Command)
 - [`describe`](#Describe-Command)
 - [`delete`](#Delete-Command)
@@ -13,6 +14,12 @@
 | `kubectl create -f {FILE/S}`                | Creates resources from the given file, files, dir or url |
 | `kubectl create namespace {NAMESPACE_NAME}` | Creates a new namespace                                  |
 | `kubectl run {POD_NAME} --image={IMAGE}`    | Creates and starts a pod from the given image            |
+
+## Edit Command
+
+| Command                      | Description        |
+| ---------------------------- | ------------------ |
+| `kubectl edit po {POD_NAME}` | Edit the given Pod |
 
 ## Get Command
 
