@@ -12,3 +12,4 @@
 | `docker stop {DOCKER_CONTAINER}`                                                                                              | Stops a docker container                                          |
 | `docker rm -v {DOCKER_CONTAINER}`                                                                                             | Removes a docker container and its volumes                        |
 | `docker rm -f {DOCKER_CONTAINER}`                                                                                             | Stops and deletes a docker container                              |
+| `docker rm -f $(docker ps -a -q)`                                                                                             | Stops and deletes all docker containers                           |
