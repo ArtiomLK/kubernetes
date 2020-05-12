@@ -9,11 +9,12 @@
 
 ## Create Command
 
-| Command                                     | Description                                              |
-| ------------------------------------------- | -------------------------------------------------------- |
-| `kubectl create -f {FILE/S}`                | Creates resources from the given file, files, dir or url |
-| `kubectl create namespace {NAMESPACE_NAME}` | Creates a new namespace                                  |
-| `kubectl run {POD_NAME} --image={IMAGE}`    | Creates and starts a pod from the given image            |
+| Command                                     | Description                                                  |
+| ------------------------------------------- | ------------------------------------------------------------ |
+| `kubectl create -f {FILE/S}`                | Creates resources from the given file, files, dir or url     |
+| `kubectl create namespace {NAMESPACE_NAME}` | Creates a new namespace                                      |
+| `kubectl run {POD_NAME} --image={IMAGE}`    | Creates and starts a pod from the given image                |
+| `kubectl apply -f {FILE/S}`                 | Apply changes or create resources based on the provided file |
 
 ## Edit Command
 
@@ -76,13 +77,15 @@
 | `kubectl config use-context {CLUSTER_NAME}`                         | changes the current cluster       |
 | `kubectl config view \| grep namespace`                             | displays current namespace in use |
 | `kubectl config set-context --current --namespace={NAMESPACE_NAME}` | changes the current namespace     |
+| `kubectl config delete-context {CONTEXT_NAME}`                      | deletes the provided context      |
 
 ## Other Commands
 
-| Command                                                      | Description                                 |
-| ------------------------------------------------------------ | ------------------------------------------- |
-| `kubectl expose deployment {DEPLOY_NAME} --type="ClusterIP"` | Exposes an external IP address              |
-| `kubectl proxy --port=8080`                                  | Starts a proxy to the Kubernetes API server |
+| Command                                                      | Description                                          |
+| ------------------------------------------------------------ | ---------------------------------------------------- |
+| `kubectl expose deployment {DEPLOY_NAME} --type="ClusterIP"` | Exposes an external IP address                       |
+| `kubectl proxy --port=8080`                                  | Starts a proxy to the Kubernetes API server          |
+| `kubectl port-forward {POD_NAME} 8080:80`                    | Forwards traffic from outside the cluster to the pod |
 
 ### Common Flags:
 

@@ -76,13 +76,15 @@
 | `kubectl config use-context {CLUSTER_NAME}`                         | Cambia el cluster en uso    |
 | `kubectl config view \| grep namespace`                             | Muestra el namespace en uso |
 | `kubectl config set-context --current --namespace={NAMESPACE_NAME}` | Cambia el namespace en uso  |
+| `kubectl config delete-context {CONTEXT_NAME}`                      | Elimina el context          |
 
 ## Otros Commandos
 
-| Comando                                                      | Descripción                                     |
-| ------------------------------------------------------------ | ----------------------------------------------- |
-| `kubectl expose deployment {DEPLOY_NAME} --type="ClusterIP"` | Expone una dirección IP externa                 |
-| `kubectl proxy --port=8080`                                  | Inicia un proxi contra el Kubernetes API server |
+| Comando                                                      | Descripción                                            |
+| ------------------------------------------------------------ | ------------------------------------------------------ |
+| `kubectl expose deployment {DEPLOY_NAME} --type="ClusterIP"` | Expone una dirección IP externa                        |
+| `kubectl proxy --port=8080`                                  | Inicia un proxi contra el Kubernetes API server        |
+| `kubectl port-forward {POD_NAME} 8080:80`                    | Redirige el tráfico de afuera del cluster hacia el pod |
 
 ### Algunos Flags:
 
