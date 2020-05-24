@@ -18,10 +18,12 @@
 
 ## Docker
 
-| Installation Links                                                        | OS              |
-| ------------------------------------------------------------------------- | --------------- |
-| [docker-for-mac](https://docs.docker.com/docker-for-mac/install/)         | Linux and MacOS |
-| [docker-for-windows](https://docs.docker.com/docker-for-windows/install/) | Windows         |
+| Installation Links                                                        | OS                                      |
+| ------------------------------------------------------------------------- | --------------------------------------- |
+| [docker-for-mac](https://docs.docker.com/docker-for-mac/install/)         | Linux and MacOS                         |
+| [docker-for-windows](https://docs.docker.com/docker-for-windows/install/) | Windows                                 |
+| `docker version`                                                          | Test docker from terminal               |
+| About Docker Desktop                                                      | Test docker from the Docker Desktop App |
 
 Enable Kubernetes on Docker ( only if you're not using Minikube)
 ![Drag Racing](enable_k8s_on_docker.png)
