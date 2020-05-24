@@ -32,10 +32,11 @@ Enable Kubernetes on Docker ( only if you're not using Minikube)
 
 ### Express Installation
 
-| Installation Command     | OS              |
-| ------------------------ | --------------- |
-| `brew install minikube`  | Linux and MacOS |
-| `choco install minikube` | Windows         |
+| Installation Command     | OS                         |
+| ------------------------ | -------------------------- |
+| `brew install minikube`  | Linux and MacOS            |
+| `choco install minikube` | Windows                    |
+| `minikube version`       | Test minikube installation |
 
 [Custom Installation](https://kubernetes.io/docs/tasks/tools/install-minikube/)
 
