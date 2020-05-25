@@ -58,16 +58,17 @@
 
 ## Delete Command
 
-| Command                                          | Description                                |
-| ------------------------------------------------ | ------------------------------------------ |
-| `kubectl delete po {POD_NAME}`                   | Deletes the specified pod                  |
-| `kubectl delete ns {NAMESPACE_NAME}`             | Deletes a specific namespace               |
-| `kubectl delete deploy {DEPLOY_NAME}`            | Deletes a specific deployment              |
-| `kubectl delete sa {SERVICE_ACCOUNT_NAME}`       | Deletes a specific service account         |
-| `kubectl delete role {ROLE_NAME}`                | Deletes a specific role                    |
-| `kubectl delete rolebinding {ROLE_BINDING_NAME}` | Deletes a specific role binding            |
-| `kubectl delete pv {PV_NAME}`                    | Deletes a specific persistent volume       |
-| `kubectl delete pvc {PVC_NAME}`                  | Deletes a specific persistent volume claim |
+| Command                                          | Description                                              |
+| ------------------------------------------------ | -------------------------------------------------------- |
+| `kubectl delete -f {FILE/S}`                     | Deletes resources from the given file, files, dir or url |
+| `kubectl delete po {POD_NAME}`                   | Deletes the specified pod                                |
+| `kubectl delete ns {NAMESPACE_NAME}`             | Deletes a specific namespace                             |
+| `kubectl delete deploy {DEPLOY_NAME}`            | Deletes a specific deployment                            |
+| `kubectl delete sa {SERVICE_ACCOUNT_NAME}`       | Deletes a specific service account                       |
+| `kubectl delete role {ROLE_NAME}`                | Deletes a specific role                                  |
+| `kubectl delete rolebinding {ROLE_BINDING_NAME}` | Deletes a specific role binding                          |
+| `kubectl delete pv {PV_NAME}`                    | Deletes a specific persistent volume                     |
+| `kubectl delete pvc {PVC_NAME}`                  | Deletes a specific persistent volume claim               |
 
 ## Config Command
 
