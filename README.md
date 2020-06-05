@@ -87,6 +87,7 @@
 | `kubectl expose deployment {DEPLOY_NAME} --type="ClusterIP"` | Exposes an external IP address                       |
 | `kubectl proxy --port=8080`                                  | Starts a proxy to the Kubernetes API server          |
 | `kubectl port-forward {POD_NAME} 8080:80`                    | Forwards traffic from outside the cluster to the pod |
+| `kubectl get po {POD_NAME} -o yaml > filename.yaml`          | Extract the definition to the file in yaml format    |
 
 ### Common Flags:
 
