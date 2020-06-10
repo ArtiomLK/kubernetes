@@ -9,12 +9,13 @@
 
 ## Create Command
 
-| Command                                     | Description                                                  |
-| ------------------------------------------- | ------------------------------------------------------------ |
-| `kubectl create -f {FILE/S}`                | Creates resources from the given file, files, dir or url     |
-| `kubectl create namespace {NAMESPACE_NAME}` | Creates a new namespace                                      |
-| `kubectl run {POD_NAME} --image={IMAGE}`    | Creates and starts a pod from the given image                |
-| `kubectl apply -f {FILE/S}`                 | Apply changes or create resources based on the provided file |
+| Command                                                                                                   | Description                                                      |
+| --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `kubectl create -f {FILE/S}`                                                                              | Creates resources from the given file, files, dir or url         |
+| `kubectl create namespace {NAMESPACE_NAME}`                                                               | Creates a new namespace                                          |
+| `kubectl apply -f {FILE/S}`                                                                               | Apply changes or create resources based on the provided file     |
+| `kubectl run {POD_NAME} --image={IMAGE}`                                                                  | Creates and starts a pod from the given image                    |
+| `kubectl run {POD_NAME} --image={IMAGE} --generator=run-pod/v1 --dry-run=true -o yaml > {FILE_NAME.yaml}` | Tests the pod definition file and output it to a local yaml file |
 
 ## Edit Command
 
@@ -87,11 +88,12 @@
 | `kubectl expose deployment {DEPLOY_NAME} --type="ClusterIP"` | Exposes an external IP address                       |
 | `kubectl proxy --port=8080`                                  | Starts a proxy to the Kubernetes API server          |
 | `kubectl port-forward {POD_NAME} 8080:80`                    | Forwards traffic from outside the cluster to the pod |
-| `kubectl get po {POD_NAME} -o yaml > filename.yaml`          | Extract the definition to the file in yaml format    |
+| `{SVC_NAME.NS.svc.cluster.local}`                            | Access a svc from a different namespace              |
 
 ### Common Flags:
 
-| Flag               | Examples                          | Description                                       |
-| ------------------ | --------------------------------- | ------------------------------------------------- |
-| `--all-namespaces` | `kubectl get po --all-namespaces` | List all pods in all namespaces                   |
-| `-o wide`          | `kubectl get pods -o wide`        | List all pods in the namespace, with more details |
+| Flag               | Examples                                               | Description                                       |
+| ------------------ | ------------------------------------------------------ | ------------------------------------------------- |
+| `--all-namespaces` | `kubectl get po --all-namespaces`                      | List all pods in all namespaces                   |
+| `-o wide`          | `kubectl get pods -o wide`                             | List all pods in the namespace, with more details |
+| `-o yaml`          | `kubectl get po {POD_NAME} -o yaml > {FILE_NAME.yaml}` | Extract the definition into a yaml file           |
