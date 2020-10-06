@@ -66,7 +66,7 @@
 
    2. Create the AKS
 
-      1. [OPTIONAL] check available k8s versions: `az aks get-versions` to use in part c.
+      1. [OPTIONAL] check available k8s versions: `az aks get-versions --location eastus` to use in part c.
 
       2. Get the Workspace Resource id:
          `workSpaceResourceID=$(az monitor log-analytics workspace show --workspace-name alkLogAnalyticsWorkspace --resource-group log_analytics_workspace_RG --query id -o tsv)`
@@ -77,7 +77,7 @@
 
          ```
          az aks create \
-         --kubernetes-version 1.18.2 \
+         --kubernetes-version 1.19.0 \
          --resource-group k8s_RG \
          --node-resource-group k8s_node_RG \
          --name k8sCluster \
@@ -93,6 +93,6 @@
 
          or
 
-         `az aks create -k 1.18.2 -g k8s_RG --node-resource-group k8s_node_RG -n k8sCluster -s Standard_B2s --vm-set-type VirtualMachineScaleSets -c 3 -a monitoring --workspace-resource-id $workSpaceResourceID --generate-ssh-keys --enable-managed-identity --tags 'env=dev' 'project=k8s'`
+         `az aks create -k 1.19.0 -g k8s_RG --node-resource-group k8s_node_RG -n k8sCluster -s Standard_B2s --vm-set-type VirtualMachineScaleSets -c 3 -a monitoring --workspace-resource-id $workSpaceResourceID --generate-ssh-keys --enable-managed-identity --tags 'env=dev' 'project=k8s'`
 
          _If you don't have a network watcher enabled in the region that the virtual network you want to generate a topology for is in, network watchers are automatically created for you in all regions. The network watchers are created in a resource group named NetworkWatcherRG._
