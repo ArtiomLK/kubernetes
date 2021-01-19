@@ -14,7 +14,10 @@
 | `scoop install kubectl`            | Windows (Option2)                                      |
 | `kubectl version --client --short` | Test to ensure the version you installed is up-to-date |
 
-[Additional info on installing kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+### Additional info on
+
+- [Installing kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- [Managing multiple client kubectl versions with asdf](https://asdf-vm.com/#/)
 
 ## Docker
 
