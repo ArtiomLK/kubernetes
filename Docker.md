@@ -9,9 +9,14 @@
 | `docker run -v ${PWD}:/app -v /app/node_modules -p 3001:3000 --rm {DOCKER_IMAGE_NAME}:{TAG}`                                  | Runs a docker image                                                     |
 | `docker run -itd --rm -v ${PWD}:/app -v /app/node_modules -p 3001:3000 -e CHOKIDAR_USEPOLLING=true {DOCKER_IMAGE_NAME}:{TAG}` | Runs a docker image with hot-reloading                                  |
 | `docker inspect {DOCKER_CONTAINER}`                                                                                           | Displays detailed information about the container                       |
-| `docker ps .`                                                                                                                 | Displays running docker containers                                      |
+| `docker ps`                                                                                                                   | Displays running docker containers                                      |
+| `docker ps -a`                                                                                                                | Displays all running and stopped docker containers                      |
 | `docker stop {DOCKER_CONTAINER}`                                                                                              | Stops a docker container                                                |
 | `docker rm -v {DOCKER_CONTAINER}`                                                                                             | Removes a docker container and its volumes                              |
 | `docker rm -f {DOCKER_CONTAINER}`                                                                                             | Stops and deletes a docker container                                    |
 | `docker rm -f $(docker ps -a -q)`                                                                                             | Stops and deletes all docker containers                                 |
 | `docker rmi --force $(docker images -q --filter "dangling=true")`                                                             | Deletes all dangling images including those with **none** names or tags |
+| `docker network create {NETWORK_NAME}`                                                                                        | Creates a docker network                                                |
+| `docker network ls`                                                                                                           | Displays created networks                                               |
+| `docker exec -it {CONTAINER_NAME OR CONTAINER_ID} 'sh'`                                                                       | Access the container shell in interactive mode                          |
+| `docker exec -it {CONTAINER_NAME OR CONTAINER_ID} 'bash'`                                                                     | Access the container bash in interactive mode                           |
