@@ -1,0 +1,12 @@
+{
+  "cSpell.words": [
+    "clusterroles",
+    "componentstatuses",
+    "configmaps",
+    "persistentvolumeclaims",
+    "persistentvolumes",
+    "replicasets",
+    "rolebinding",
+    "serviceaccounts"
+  ]
+}
