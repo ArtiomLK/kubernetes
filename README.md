@@ -99,3 +99,10 @@
 | `--all-namespaces` | `kubectl get po --all-namespaces`                      | List all pods in all namespaces                   |
 | `-o wide`          | `kubectl get pods -o wide`                             | List all pods in the namespace, with more details |
 | `-o yaml`          | `kubectl get po {POD_NAME} -o yaml > {FILE_NAME.yaml}` | Extract the definition into a yaml file           |
+
+### Create Definition Files
+
+- Pods
+  - `kubectl run nginx --image nginx --dry-run=client -o yaml > pod-nginx.yaml`
+  - `kubectl run nginx-open-port --image nginx --port 80 --dry-run=client -o yaml > pod-nginx-open-port.yaml`
+  - `kubectl run nginx-alpine --image nginx:alpine --dry-run=client -o yaml > pod-nginx-alpine.yaml`
