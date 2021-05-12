@@ -106,3 +106,6 @@
   - `kubectl run nginx --image nginx --dry-run=client -o yaml > pod-nginx.yaml`
   - `kubectl run nginx-open-port --image nginx --port 80 --dry-run=client -o yaml > pod-nginx-open-port.yaml`
   - `kubectl run nginx-alpine --image nginx:alpine --dry-run=client -o yaml > pod-nginx-alpine.yaml`
+- Deployments
+  - `kubectl create deploy nginx --image nginx --dry-run=client -o yaml > deploy-nginx.yaml`
+  - `kubectl create deploy nginx-alpine --image nginx:alpine --replicas 3 --dry-run=client -o yaml > deploy-nginx-alpine.yaml`
