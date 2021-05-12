@@ -43,6 +43,8 @@
 | `kubectl get pvc \| persistentvolumeclaims` | Lists persistent volume claims                  |
 | `kubectl get secret`                        | Lists secrets/Tokens                            |
 | `kubectl get rolebinding`                   | Lists rolebinding                               |
+| `kubectl get cm \| configmaps`              | Lists ConfigMaps                                |
+| `kubectl get netpol \| networkpolicies`     | Lists Network Policies                          |
 
 ## Describe Command
 
