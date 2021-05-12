@@ -1,4 +1,3 @@
-# kubectl run nginx-alpine --image nginx:alpine -o yaml --dry-run=client > pod-nginx-alpine.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -8,9 +7,9 @@ metadata:
   name: nginx-alpine
 spec:
   containers:
-    - image: nginx:alpine
-      name: nginx-alpine
-      resources: {}
+  - image: nginx:alpine
+    name: nginx-alpine
+    resources: {}
   dnsPolicy: ClusterFirst
   restartPolicy: Always
 status: {}

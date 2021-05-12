@@ -1,4 +1,3 @@
-# kubectl run nginx --image nginx -o yaml --dry-run=client > pod-nginx.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -8,9 +7,9 @@ metadata:
   name: nginx
 spec:
   containers:
-    - image: nginx
-      name: nginx
-      resources: {}
+  - image: nginx
+    name: nginx
+    resources: {}
   dnsPolicy: ClusterFirst
   restartPolicy: Always
 status: {}
