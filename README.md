@@ -108,4 +108,27 @@
   - `kubectl run nginx-alpine --image nginx:alpine --dry-run=client -o yaml > pod-nginx-alpine.yaml`
 - Deployments
   - `kubectl create deploy nginx --image nginx --dry-run=client -o yaml > deploy-nginx.yaml`
-  - `kubectl create deploy nginx-alpine --image nginx:alpine --replicas 3 --dry-run=client -o yaml > deploy-nginx-alpine.yaml`
+  - `kubectl create deploy nginx-w-replicas --image nginx --replicas 3 --dry-run=client -o yaml > deploy-nginx-w-replicas.yaml`
+  - `kubectl create deploy nginx-alpine-w-replicas --image nginx:alpine --replicas 3 --dry-run=client -o yaml > deploy-nginx-alpine-w-replicas.yaml`
+- Services
+  - `kubectl expose pod nginx-open-port --port=80 --name nginx-service-to-pod --type=NodePort --dry-run=client -o yaml > svc-nginx-to-pod.yaml`
+  - `kubectl expose deploy nginx-w-replicas --port=80 --name nginx-service-to-deploy --type=NodePort --dry-run=client -o yaml > svc-nginx-to-deploy.yaml`
+
+### Alias
+
+```
+alias k="kubectl"
+alias ka="k apply"
+alias kc="k create"
+alias kd="k describe"
+alias kdel="k delete"
+alias ke="k explain"
+alias ke2="k expose"
+alias kg="k get"
+alias kl="k label"
+alias klog="k logs"
+alias kr="k run"
+alias krol="k rollout"
+alias kt="k taint"
+alias ktop="k top"
+```

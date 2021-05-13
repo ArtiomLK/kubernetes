@@ -3,22 +3,22 @@ kind: Deployment
 metadata:
   creationTimestamp: null
   labels:
-    app: nginx-alpine
-  name: nginx-alpine
+    app: nginx-w-replicas
+  name: nginx-w-replicas
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: nginx-alpine
+      app: nginx-w-replicas
   strategy: {}
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: nginx-alpine
+        app: nginx-w-replicas
     spec:
       containers:
-      - image: nginx:alpine
+      - image: nginx
         name: nginx
         resources: {}
 status: {}
