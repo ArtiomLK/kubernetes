@@ -4,7 +4,7 @@ metadata:
   creationTimestamp: null
   labels:
     run: nginx-open-port
-  name: nginx-service-to-pod
+  name: nginx-service-to-pod-w-open-port
 spec:
   ports:
   - port: 80
