@@ -118,6 +118,10 @@
   - ClusterIP
     - `kubectl expose pod nginx --port=80 --name nginx-service-to-pod --type=ClusterIP --dry-run=client -o yaml > svc-nginx-to-pod.yaml`
     - `kubectl expose deploy nginx-w-replicas --port=80 --name nginx-service-to-deploy --type=ClusterIP --dry-run=client -o yaml > svc-nginx-to-deploy.yaml`
+  - ConfigMaps
+    - `kubectl create cm cm-empty -o yaml --dry-run=client > cm-empty.yaml`
+    - `kubectl create cm cm-sample --from-literal=KEY1=VAL1 --from-literal=KEY2=VAL2 -o yaml --dry-run=client > cm-sample.yaml`
+    - `kubectl create cm cm-from-file --from-file ui.properties -o yaml --dry-run=client > cm-from-file.yaml`
 
 ### Alias
 

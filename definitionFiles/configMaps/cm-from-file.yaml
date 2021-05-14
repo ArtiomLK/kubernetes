@@ -1,0 +1,11 @@
+apiVersion: v1
+data:
+  ui.properties: |
+    color.good=purple
+    color.bad=yellow
+    allow.textmode=true
+    how.nice.to.look=fairlyNice
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: cm-from-file
