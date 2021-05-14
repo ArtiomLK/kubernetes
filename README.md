@@ -85,12 +85,14 @@
 
 ## Other Commands
 
-| Command                                                      | Description                                          |
-| ------------------------------------------------------------ | ---------------------------------------------------- |
-| `kubectl expose deployment {DEPLOY_NAME} --type="ClusterIP"` | Exposes an external IP address                       |
-| `kubectl proxy --port=8080`                                  | Starts a proxy to the Kubernetes API server          |
-| `kubectl port-forward {POD_NAME} 8080:80`                    | Forwards traffic from outside the cluster to the pod |
-| `{SVC_NAME.NS.svc.cluster.local}`                            | Access a svc from a different namespace              |
+| Command                                                      | Description                                             |
+| ------------------------------------------------------------ | ------------------------------------------------------- |
+| `kubectl expose deployment {DEPLOY_NAME} --type="ClusterIP"` | Exposes an external IP address                          |
+| `kubectl proxy --port=8080`                                  | Starts a proxy to the Kubernetes API server             |
+| `kubectl port-forward {POD_NAME} 8080:80`                    | Forwards traffic from outside the cluster to the pod    |
+| `{SVC_NAME.NS.svc.cluster.local}`                            | Access a svc from a different namespace                 |
+| `wget -q -O - http://nginx-service-to-deploy`                | Test NetworkPolicy connection from one Pod to a service |
+| `nc -z -v -w 3 <svc-IP> 80`                                  | https://www.computerhope.com/unix/nc.html               |
 
 ### Common Flags:
 
