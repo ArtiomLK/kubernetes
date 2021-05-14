@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: rs-nginx-pod
+      function: Front-end
+  template:
+    metadata:
+      name: nginx-pod
+      labels:
+        app: rs-nginx-pod
+        function: Front-end
+    spec:
+      containers:
+        - name: nginx-container-rs
+          image: nginx
