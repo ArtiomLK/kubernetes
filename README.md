@@ -115,6 +115,9 @@
     - `kubectl expose pod nginx --port=80 --name nginx-service-to-pod --type=NodePort --dry-run=client -o yaml > svc-nginx-to-pod.yaml`
     - `kubectl expose pod nginx-open-port --port=80 --name nginx-service-to-pod-w-open-port --type=NodePort --dry-run=client -o yaml > svc-nginx-to-pod-w-open-container-port.yaml`
     - `kubectl expose deploy nginx-w-replicas --port=80 --name nginx-service-to-deploy --type=NodePort --dry-run=client -o yaml > svc-nginx-to-deploy.yaml`
+  - ClusterIP
+    - `kubectl expose pod nginx --port=80 --name nginx-service-to-pod --type=ClusterIP --dry-run=client -o yaml > svc-nginx-to-pod.yaml`
+    - `kubectl expose deploy nginx-w-replicas --port=80 --name nginx-service-to-deploy --type=ClusterIP --dry-run=client -o yaml > svc-nginx-to-deploy.yaml`
 
 ### Alias
 
