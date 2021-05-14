@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: netpol-allow-egress-from-busybox-to-nginx
+spec:
+  podSelector:
+    matchLabels:
+      app: busybox
+      netpol: allow
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: nginx-w-replicas
+      ports:
+        - protocol: TCP
+          port: 80
