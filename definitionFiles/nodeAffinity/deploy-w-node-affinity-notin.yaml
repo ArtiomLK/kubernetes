@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: nginx-w-replicas
+  name: nginx-w-replicas
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: nginx-w-replicas
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginx-w-replicas
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: NotIn #In, NotIn, Exists
+                    values:
+                      - minikube
+                      - minikube-m03
+      containers:
+        - image: nginx
+          name: nginx
+          resources: {}
+status: {}
