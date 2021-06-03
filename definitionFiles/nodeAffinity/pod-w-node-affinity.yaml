@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-node-affinity
+  namespace: default
+spec:
+  containers:
+    - name: pod-affinity-container
+      image: nginx
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn #In, NotIn, Exists
+                values:
+                  - minikube
+                  - minikube-m03
