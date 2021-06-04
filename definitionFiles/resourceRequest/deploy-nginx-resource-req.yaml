@@ -10,6 +10,7 @@ spec:
     matchLabels:
       app: nginx-w-replicas
   template:
+    metadata:
       labels:
         app: nginx-w-replicas
     spec:
