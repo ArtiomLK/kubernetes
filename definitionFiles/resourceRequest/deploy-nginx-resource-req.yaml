@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: nginx-w-replicas
+  name: nginx-w-replicas
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-w-replicas
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginx-w-replicas
+    spec:
+      containers:
+        - image: nginx
+          name: nginx
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: 1
+            limits:
+              cpu: 1.5
+              memory: "2Gi"
