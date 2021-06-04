@@ -10,7 +10,6 @@ spec:
   selector:
     matchLabels:
       app: nginx-w-replicas
-  strategy: {}
   template:
     metadata:
       creationTimestamp: null
