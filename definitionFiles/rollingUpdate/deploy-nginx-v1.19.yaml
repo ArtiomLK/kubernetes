@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-w-replicas
+  name: nginx-w-replicas
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: nginx-w-replicas
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: nginx-w-replicas
+    spec:
+      containers:
+        - image: nginx:1.19.0
+          name: nginx
