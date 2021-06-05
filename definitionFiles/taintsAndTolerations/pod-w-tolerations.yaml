@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-w-replicas
+  name: nginx-w-replicas
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: nginx-w-replicas
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: nginx-w-replicas
+    spec:
+      containers:
+        - image: nginx
+          name: nginx
+      tolerations:
+        - key: "key0"
+          operator: "Equal"
+          value: "val0"
+          effect: "NoSchedule"
+        - key: "key0"
+          operator: "Equal"
+          value: "val0"
+          effect: "NoExecute"
