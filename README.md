@@ -45,6 +45,7 @@
 | `kubectl get rolebinding`                   | Lists rolebinding                               |
 | `kubectl get cm \| configmaps`              | Lists ConfigMaps                                |
 | `kubectl get netpol \| networkpolicies`     | Lists Network Policies                          |
+| `kubectl get quota`                         | Lists Resource Quotas                           |
 
 ## Describe Command
 
@@ -92,7 +93,7 @@
 | `kubectl port-forward {POD_NAME} 8080:80`                    | Forwards traffic from outside the cluster to the pod    |
 | `{SVC_NAME.NS.svc.cluster.local}`                            | Access a svc from a different namespace                 |
 | `wget -q -O - http://nginx-service-to-deploy`                | Test NetworkPolicy connection from one Pod to a service |
-| `nc -z -v -w 3 <svc-IP> 80`                                  | https://www.computerhope.com/unix/nc.html               |
+| `nc -z -v -w 3 <svc-IP> 80`                                  | https://www.computerhope.com/unix/nc.htm                |
 
 ### Common Flags:
 
@@ -120,10 +121,10 @@
   - ClusterIP
     - `kubectl expose pod nginx --port=80 --name nginx-service-to-pod --type=ClusterIP --dry-run=client -o yaml > svc-nginx-to-pod.yaml`
     - `kubectl expose deploy nginx-w-replicas --port=80 --name nginx-service-to-deploy --type=ClusterIP --dry-run=client -o yaml > svc-nginx-to-deploy.yaml`
-  - ConfigMaps
-    - `kubectl create cm cm-empty -o yaml --dry-run=client > cm-empty.yaml`
-    - `kubectl create cm cm-sample --from-literal=KEY1=VAL1 --from-literal=KEY2=VAL2 -o yaml --dry-run=client > cm-sample.yaml`
-    - `kubectl create cm cm-from-file --from-file ui.properties -o yaml --dry-run=client > cm-from-file.yaml`
+- ConfigMaps
+  - `kubectl create cm cm-empty -o yaml --dry-run=client > cm-empty.yaml`
+  - `kubectl create cm cm-sample --from-literal=KEY1=VAL1 --from-literal=KEY2=VAL2 -o yaml --dry-run=client > cm-sample.yaml`
+  - `kubectl create cm cm-from-file --from-file ui.properties -o yaml --dry-run=client > cm-from-file.yaml`
 
 ### Alias
 
