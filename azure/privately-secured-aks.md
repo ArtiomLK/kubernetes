@@ -392,7 +392,8 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    # Create an User Managed Identity
    az identity create \
    -g $app_rg \
-   -n $aks_id_n
+   -n $aks_id_n \
+   --tags $tags
 
    # Assign permissions to the User Managed Identity Network Contributor Role to modify vnet as required
    MANAGEDID_SP_ID=$(az identity show --resource-group $app_rg --name $aks_id_n --query principalId --out tsv); echo $MANAGEDID_SP_ID
@@ -447,9 +448,6 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --attach-acr $ACR_ID \
    --enable-private-cluster \
    --tags $tags
-
-   # --service-principal <appId> \ #TODO NOT REQUIRED BECAUSE USING MANAGED IDENITITY (--assign-identity)
-   # --client-secret <password> \ #TODO NOT REQUIRED BECAUSE USING MANAGED IDENITITY (--assign-identity)
    ```
 
    _If you don't have a network watcher enabled in the region that the virtual network you want to generate a topology for is in, network watchers are automatically created for you in all regions. The network watchers are created in a resource group named NetworkWatcherRG._
