@@ -39,7 +39,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    # Main Vars
    # ---
    app="confidential";                 echo $app
-   env="uat";                          echo $env
+   env="prod";                          echo $env
    l="eastus2";                        echo $l
    tags="env=$env app=$app";           echo $tags
    vm_user="artiomlk";                 echo $vm_user
