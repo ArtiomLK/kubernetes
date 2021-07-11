@@ -9,7 +9,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
 - Private AKS (Azure Kubernetes Service)
 - Private ACR (Azure Container Registry)
 - Azure Private DNS Zone (Domain Name System)
-- Private Endpoints
+- Azure Private Endpoints
 - Azure Bastion
 - Azure VM Scale Set
 - Azure vNets & sNets
