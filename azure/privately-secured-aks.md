@@ -4,6 +4,18 @@
 
 Connect privately to Azure Kubernetes Services and Azure Container Registry using Azure Private Links
 
+### Resources
+
+- Private AKS (Azure Kubernetes Service)
+- Private ACR (Azure Container Registry)
+- Azure Private DNS Zone (Domain Name System)
+- Private Endpoints
+- Azure Bastion
+- Azure VM Scale Set
+- Azure vNets & sNets
+- Azure NSG (Network Security Groups)
+- Azure User & System Managed Identities
+
 ## Useful Commands
 
 | Command                                                              | Description                                     |
@@ -334,7 +346,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
     --private-connection-resource-id $ACR_ID \
     --group-ids registry \
     --connection-name "$pe_n-connection" \
-    --tags $tags --verbose
+    --tags $tags
 
    # ---
    # GET ENDPOINT IP CONFIGURATIONS
