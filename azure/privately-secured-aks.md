@@ -109,6 +109,12 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    # ---
    bastion_n="bastion-$app-$env";            echo $bastion_n
    bastion_pip="pip-bastion-$app-$env";      echo $bastion_pip
+
+   # ---
+   # DevOps Agents (scale set recommended though)
+   # ---
+   devops_vm_n="vm-$app-$env-devops";            echo $devops_vm_n
+   devops_vm_img="UbuntuLTS";                    echo $devops_vm_img
    ```
 
 2. ### Create Topology
