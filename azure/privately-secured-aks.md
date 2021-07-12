@@ -287,80 +287,12 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --address-prefixes $snet_addr_pe \
    --network-security-group $nsg_n_default
 
-   # SQLMI NSG
+   # default SQLMI NSG
    az network nsg create \
    --name $nsg_n_sqlmi \
    --resource-group $app_rg \
    --location $l \
    --tags $tags
-
-   # Create Inbound SQLMI NSG Rules
-   # allow_management_inbound
-   az network nsg rule create \
-   --direction Inbound \
-   --name "allow_management_inbound" \
-   --nsg-name $nsg_n_sqlmi \
-   --priority 100 \
-   --resource-group $app_rg \
-   --access Allow \
-   --destination-address-prefixes $snet_addr_sqlmi \
-   --destination-port-ranges 9000 9003 1438 1440 1452 \
-   --protocol Tcp \
-   --source-address-prefixes "*" \
-   --source-port-ranges "*"
-   # allow_misubnet_inbound
-   az network nsg rule create\
-   --name "allow_misubnet_inbound" \
-   --nsg-name $nsg_n_sqlmi \
-   --priority 200 \
-   --resource-group $app_rg \
-   --access Allow \
-   --destination-address-prefixes $snet_addr_sqlmi \
-   --destination-port-ranges "*" \
-   --direction Inbound \
-   --protocol "*" \
-   --source-address-prefixes $snet_addr_sqlmi \
-   --source-port-ranges "*"
-   # allow_health_probe_inbound
-   az network nsg rule create \
-   --name "allow_health_probe_inbound" \
-   --nsg-name $nsg_n_sqlmi \
-   --priority 300 \
-   --resource-group $app_rg \
-   --access Allow \
-   --destination-address-prefixes $snet_addr_sqlmi \
-   --destination-port-ranges "*" --direction Inbound \
-   --protocol "*" \
-   --source-address-prefixes AzureLoadBalancer \
-   --source-port-ranges "*"
-
-   # Create Outbound SQLMI NSG Rules
-   # allow_management_outbound
-   az network nsg rule create \
-   --name "allow_management_outbound" \
-   --nsg-name $nsg_n_sqlmi \
-   --priority 1100 \
-   --resource-group $app_rg \
-   --access Allow \
-   --destination-address-prefixes AzureCloud \
-   --destination-port-ranges 443 12000 \
-   --direction Outbound \
-   --protocol Tcp \
-   --source-address-prefixes $snet_addr_sqlmi \
-   --source-port-ranges "*"
-   # allow_misubnet_outbound
-   az network nsg rule create \
-   --name "allow_misubnet_outbound" \
-   --nsg-name $nsg_n_sqlmi \
-   --priority 200 \
-   --resource-group $app_rg \
-   --access Allow \
-   --destination-address-prefixes $snet_addr_sqlmi \
-   --destination-port-ranges "*" \
-   --direction Outbound \
-   --protocol "*" \
-   --source-address-prefixes $snet_addr_sqlmi \
-   --source-port-ranges "*"
 
    # Create SQLMI Subnet
    az network vnet subnet create \
@@ -720,12 +652,6 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
     --tags $tags
 
     # SQLMI RT Routes
-    az network route-table route create \
-    --name "primaryToMIManagementService" \
-    --address-prefix 0.0.0.0/0 \
-    --next-hop-type Internet \
-    --resource-group $app_rg \
-    --route-table-name $sqlmi_rt_n
     az network route-table route create \
     --name "ToLocalClusterNode" \
     --address-prefix $snet_addr_sqlmi \
