@@ -54,7 +54,8 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    env="prod";                         echo $env
    l="eastus2";                        echo $l
    tags="env=$env app=$app";           echo $tags
-   vm_user="artiomlk";                 echo $vm_user
+   user_n_test="artiomlk";             echo $user_n_test
+   user_pass_test="Password123!";      echo $user_pass_test
 
    log_rg="rg-log-$app-$env";          echo $log_rg
    log_n="log-$app-$env";              echo $log_n
@@ -509,7 +510,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --vnet-name $vnet_n \
    --subnet $snet_n_devops \
    --image $devops_vm_img \
-   --admin-username $vm_user \
+   --admin-username $user_n_test \
    --generate-ssh-keys \
    --public-ip-address "" \
    --nsg "" \
@@ -533,7 +534,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --platform-fault-domain-count 1 \
    --load-balancer "" \
    --assign-identity \
-   --admin-username $vm_user \
+   --admin-username $user_n_test \
    --tags $tags
 
    # EXPECTED RESULT {"clientId": "msi"}
@@ -672,7 +673,8 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
     --public-data-endpoint-enabled false \
     --capacity 4 \
     --minimal-tls-version 1.2 \
-    --admin-user $sqlmi_login \
+    --proxy-override Redirect \
+    --admin-user $user_n_test \
     --admin-password $sqlmi_pass \
     --resource-group $app_rg \
     --subnet $snet_n_sqlmi \
@@ -729,6 +731,8 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
 - [MS | Docs | SQL Managed Instance virtual network requirements][29]
 - [MS | Docs | Use CLI to create an Azure SQL Managed Instance][30]
 - [MS | Docs | Enabling service-aided subnet configuration for Azure SQL Managed Instance][31]
+- [MS | Docs | Azure SQL Managed Instance connection types][32]
+- [MS | Docs | Quickstart: Configure an Azure VM to connect to Azure SQL Managed Instance][33]
 - Others
 - [Git Bash | GitHub | azure cli commands automatically appends git-bash path in the parameter that contains forward slash][1]
 
@@ -764,3 +768,5 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
 [29]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/connectivity-architecture-overview#network-requirements
 [30]: https://docs.microsoft.com/en-us/azure/sql-database/scripts/sql-database-create-configure-managed-instance-cli
 [31]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/subnet-service-aided-configuration-enable
+[32]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/connection-types-overview
+[33]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/connect-vm-instance-configure
