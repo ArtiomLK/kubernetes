@@ -54,7 +54,8 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    env="prod";                         echo $env
    l="eastus2";                        echo $l
    tags="env=$env app=$app";           echo $tags
-   vm_user="artiomlk";                 echo $vm_user
+   user_n_test="artiomlk";             echo $user_n_test
+   user_pass_test="Password123!";      echo $user_pass_test
 
    log_rg="rg-log-$app-$env";          echo $log_rg
    log_n="log-$app-$env";              echo $log_n
@@ -63,13 +64,13 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    arm_sc_n="sc-sub-alk";              echo $arm_sc_n
    acr_sc_n="acr-sc-$env";             echo $acr_sc_n
 
-
    # ---
    # NETWORK TOPOLOGY
    # ---
    #NSG
    nsg_n_default="nsg-$app-$env-default"; echo $nsg_n_default
    nsg_n_bastion="nsg-$app-$env-bastion"; echo $nsg_n_bastion
+   nsg_n_sqlmi="nsg-$app-$env-sqlmi";     echo $nsg_n_sqlmi
    #VNET
    vnet_pre="10.5";                       echo $vnet_pre
    vnet_n="vnet-$app-$env";               echo $vnet_n
@@ -83,7 +84,10 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    #Private Endpoints
    snet_n_pe="snet-$app-$env-pe";         echo $snet_n_pe
    snet_addr_pe="$vnet_pre.3.0/24";       echo $snet_addr_pe
-   #AKS
+   #SQL_MANAGED_INSTANCE
+   snet_n_sqlmi="snet-$app-$env-sqlmi";   echo $snet_n_sqlmi
+   snet_addr_sqlmi="$vnet_pre.4.0/24";    echo $snet_addr_sqlmi
+   #AKSs
    snet_n_aks="snet-$app-$env-aks";       echo $snet_n_aks
    snet_addr_aks="$vnet_pre.8.0/21";      echo $snet_addr_aks
 
@@ -115,16 +119,34 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    # ---
    devops_vm_n="vm-$app-$env-devops";            echo $devops_vm_n
    devops_vm_img="UbuntuLTS";                    echo $devops_vm_img
+
+   # ---
+   # SQLMI
+   # ---
+   sqlmi_n="sqlmi-$app-$env";            echo $sqlmi_n
+   sqlmi_rt_n="rt-sqlmi-$app-$env";      echo $sqlmi_rt_n
+   sqlmi_login="artiomlk";               echo $sqlmi_login
+   sqlmi_pass="Password1234567890!";     echo $sqlmi_pass
    ```
 
-2. ### Create Topology
+2. ### Create Main App Resource Group
 
    ```bash
-   # ---
    # Create a resource group where our app resources will be created, e.g. AKS, ACR, vNets...
-   # ---
    az group create \
    --name $app_rg \
+   --location $l \
+   --tags $tags
+   ```
+
+3. ### Create Topology
+
+   ```bash
+   # Main vNet
+   az network vnet create \
+   --name $vnet_n \
+   --resource-group $app_rg \
+   --address-prefixes $vnet_addr \
    --location $l \
    --tags $tags
 
@@ -135,13 +157,13 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --location $l \
    --tags $tags
 
+   # Bastion
    # Bastion NSG
    az network nsg create \
    --resource-group $app_rg \
    --name $nsg_n_bastion \
    --location $l \
    --tags $tags
-
    # Bastion NSG Rules
    # Inbound/Ingress
    # AllowHttpsInBound
@@ -242,14 +264,6 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --resource-group $app_rg \
    --direction Outbound
 
-   # Main vNet
-   az network vnet create \
-   --name $vnet_n \
-   --resource-group $app_rg \
-   --address-prefixes $vnet_addr \
-   --location $l \
-   --tags $tags
-
    # Bastion Subnet
    az network vnet subnet create \
    --resource-group $app_rg \
@@ -274,6 +288,22 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --address-prefixes $snet_addr_pe \
    --network-security-group $nsg_n_default
 
+   # default SQLMI NSG
+   az network nsg create \
+   --name $nsg_n_sqlmi \
+   --resource-group $app_rg \
+   --location $l \
+   --tags $tags
+
+   # Create SQLMI Subnet
+   az network vnet subnet create \
+   --resource-group $app_rg \
+   --vnet-name $vnet_n \
+   --name $snet_n_sqlmi \
+   --address-prefixes $snet_addr_sqlmi \
+   --network-security-group $nsg_n_sqlmi \
+   --delegations Microsoft.Sql/managedInstances
+
    # AKS Subnet
    az network vnet subnet create \
    --resource-group $app_rg \
@@ -282,7 +312,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --address-prefixes $snet_addr_aks
    ```
 
-3. ### Create the Azure Container Registry (ACR)
+4. ### Create the Azure Container Registry (ACR)
 
    ```bash
    # Create a private ACR
@@ -313,7 +343,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --tags $tags
    ```
 
-4. ### Create a private Link to ACR
+5. ### Create a private Link to ACR
 
    ```bash
    # Disable network policies in the private endpoint subnet
@@ -404,7 +434,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --ipv4-address $DATA_ENDPOINT_PRIVATE_IP
    ```
 
-5. ### Create the Azure Kubernetes Service (AKS)
+6. ### Create the Azure Kubernetes Service (AKS)
 
    ```bash
    # Create an User Managed Identity
@@ -470,7 +500,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
 
    _If you don't have a network watcher enabled in the region that the virtual network you want to generate a topology for is in, network watchers are automatically created for you in all regions. The network watchers are created in a resource group named NetworkWatcherRG._
 
-6. ### Create an AzureDevOps agent
+7. ### Create an AzureDevOps agent
 
    ```bash
    # test vm that could also be used as DevOps Agent (scale sets recommend though)
@@ -480,7 +510,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --vnet-name $vnet_n \
    --subnet $snet_n_devops \
    --image $devops_vm_img \
-   --admin-username $vm_user \
+   --admin-username $user_n_test \
    --generate-ssh-keys \
    --public-ip-address "" \
    --nsg "" \
@@ -504,7 +534,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --platform-fault-domain-count 1 \
    --load-balancer "" \
    --assign-identity \
-   --admin-username $vm_user \
+   --admin-username $user_n_test \
    --tags $tags
 
    # EXPECTED RESULT {"clientId": "msi"}
@@ -536,7 +566,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    # You can't RDP from outside the vnet to the vm because it ONLY has a private IP and the NSG associated does not allow RDP by default, we overcome this with a Bastion :)
    ```
 
-7. ### Create a Bastion agent
+8. ### Create a Bastion agent
 
    ```bash
    # Bastion Public IP
@@ -556,7 +586,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --location $l
    ```
 
-8. ### Test Private Endpoint DNS Resolution
+9. ### Test Private Endpoint DNS Resolution
 
    ```bash
    # ssh azureuser@publicIpAddress
@@ -610,11 +640,54 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    kubectl get no
    ```
 
-9. ### Cleanup resources
+10. ### Create and Setup an Azure SQL Managed Identity
 
-   ```bash
-   az group delete -n $app_rg -y --no-wait
-   ```
+    [Review Network Requirements][29]
+
+    ```bash
+    # Create an SQLMI custom Route Table
+    az network route-table create \
+    --name $sqlmi_rt_n \
+    --resource-group $app_rg \
+    --location $l \
+    --tags $tags
+
+    # SQLMI RT Routes
+    az network route-table route create \
+    --name "ToLocalClusterNode" \
+    --address-prefix $snet_addr_sqlmi \
+    --next-hop-type VnetLocal \
+    --resource-group $app_rg \
+    --route-table-name $sqlmi_rt_n
+
+    # Configure SNET with Custom Route Table
+    az network vnet subnet update\
+    --vnet-name $vnet_n \
+    --name $snet_n_sqlmi \
+    --route-table $sqlmi_rt_n \
+    --resource-group $app_rg
+
+    # Create SQLMI
+    az sql mi create \
+    --name $sqlmi_n \
+    --public-data-endpoint-enabled false \
+    --capacity 4 \
+    --minimal-tls-version 1.2 \
+    --proxy-override Redirect \
+    --admin-user $user_n_test \
+    --admin-password $sqlmi_pass \
+    --resource-group $app_rg \
+    --subnet $snet_n_sqlmi \
+    --vnet-name $vnet_n \
+    --location $l \
+    --tags $tags
+    ```
+
+11. ### Cleanup resources
+
+    ```bash
+    az group delete -n $app_rg -y --no-wait
+    ```
 
 ## Additional Resources
 
@@ -652,6 +725,14 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
 - [MS | Docs | Use an Azure managed identity to authenticate to an Azure container registry][20]
 - Azure Bastion
 - [MS | Docs | Working with NSG access and Azure Bastion][16]
+- Azure SQL managed Instance
+- [MS | Docs | Determine required subnet size & range for Azure SQL Managed Instance][27]
+- [MS | Docs | Configure an existing virtual network for Azure SQL Managed Instance][28]
+- [MS | Docs | SQL Managed Instance virtual network requirements][29]
+- [MS | Docs | Use CLI to create an Azure SQL Managed Instance][30]
+- [MS | Docs | Enabling service-aided subnet configuration for Azure SQL Managed Instance][31]
+- [MS | Docs | Azure SQL Managed Instance connection types][32]
+- [MS | Docs | Quickstart: Configure an Azure VM to connect to Azure SQL Managed Instance][33]
 - Others
 - [Git Bash | GitHub | azure cli commands automatically appends git-bash path in the parameter that contains forward slash][1]
 
@@ -682,3 +763,10 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
 [24]: https://docs.microsoft.com/en-us/azure/aks/configure-kubenet
 [25]: https://docs.microsoft.com/en-us/azure/dns/private-dns-overview
 [26]: https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-manage-user-assigned-managed-identities?pivots=identity-mi-methods-azcli
+[27]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/vnet-subnet-determine-size
+[28]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/vnet-existing-add-subnet
+[29]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/connectivity-architecture-overview#network-requirements
+[30]: https://docs.microsoft.com/en-us/azure/sql-database/scripts/sql-database-create-configure-managed-instance-cli
+[31]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/subnet-service-aided-configuration-enable
+[32]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/connection-types-overview
+[33]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/connect-vm-instance-configure
