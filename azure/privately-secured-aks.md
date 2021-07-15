@@ -15,6 +15,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
 - Azure vNets & sNets
 - Azure NSG (Network Security Groups)
 - Azure User & System Managed Identities
+- Azure SQL Managed Identity
 
 ## Useful Commands
 
