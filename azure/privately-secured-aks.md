@@ -301,13 +301,6 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --address-prefixes $snet_addr_sqlmi \
    --network-security-group $nsg_n_sqlmi \
    --delegations Microsoft.Sql/managedInstances
-
-   # AKS Subnet
-   az network vnet subnet create \
-   --resource-group $app_rg \
-   --vnet-name $vnet_n \
-   --name $snet_n_aks \
-   --address-prefixes $snet_addr_aks
    ```
 
 5. ### Setup Private Link Subnet
@@ -446,20 +439,21 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --sku $acr_sku \
    --public-network-enabled true \
    --tags $tags
-
-   # [OPTIONALLY] Integrate the ACR with an existing AKS (this creates a system managed identity)
-   # it authorizes the ACR in your subscription and configures the appropriate ACRPull role for the managed identity.
-   # get ACR ID
-   ACR_ID=$(az acr show --name ${acr_n}publict --query 'id' --output tsv); echo $ACR_ID
-   az aks update \
-   -n myAKSCluster \
-   -g $app_rg \
-   --attach-acr $ACR_ID
    ```
 
-8. ### Create the Azure Kubernetes Service (AKS)
+8. ### Create a private Azure Kubernetes Service (AKS) with Kubenet
+
+   1. [Create a Resource Group][102]
+   1. [Create a vNet][100]
 
    ```bash
+   # AKS Subnet
+   az network vnet subnet create \
+   --resource-group $app_rg \
+   --vnet-name $vnet_n \
+   --name $snet_n_aks \
+   --address-prefixes $snet_addr_aks
+
    # Create an User Managed Identity
    az identity create \
    -g $app_rg \
@@ -492,11 +486,14 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    AKS_PDNSZ_ID=$(az network private-dns zone show --resource-group $app_rg --name "privatelink.$l.azmk8s.io" --query id -o tsv) ; echo $AKS_PDNSZ_ID
    az role assignment create --assignee $MANAGEDID_SP_ID --scope $AKS_PDNSZ_ID --role "Private DNS Zone Contributor"
 
-
-   # GET AKS CREATE OTHER AZ RESOURCES IDS
-   ACR_ID=$(az acr show --name $acr_n --query 'id' --output tsv);   echo $ACR_ID
+   # Provide sNet to allocate AKS nodes
    SNET_AKS_ID=$(az network vnet subnet show --resource-group $app_rg --vnet-name $vnet_n --name $snet_n_aks --query id -o tsv); echo $SNET_AKS_ID
+   # Attach User Managed Identity by ID to our AKS
    MANAGEDID_ID=$(az identity show --resource-group $app_rg --name $aks_id_n --query id --out tsv); echo $MANAGEDID_ID
+
+   # OPTIONALLY - Attach ACR by ID to our AKS
+   # ACR_ID=$(az acr show --name $acr_n --query 'id' --output tsv);   echo $ACR_ID
+   # --attach-acr $ACR_ID \
 
    # Create the AKS with any of the following command
    az aks create \
@@ -516,80 +513,93 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --enable-managed-identity \
    --assign-identity $MANAGEDID_ID \
    --private-dns-zone $AKS_PDNSZ_ID \
-   --attach-acr $ACR_ID \
    --enable-private-cluster \
    --tags $tags
    ```
 
    _If you don't have a network watcher enabled in the region that the virtual network you want to generate a topology for is in, network watchers are automatically created for you in all regions. The network watchers are created in a resource group named NetworkWatcherRG._
 
-9. ### Create an AzureDevOps agent
+9. ### AKS to ACR Integration
 
    ```bash
-   # test vm that could also be used as DevOps Agent (scale sets recommend though)
-   az vm create \
-   --resource-group $app_rg \
-   --name $devops_vm_n \
-   --vnet-name $vnet_n \
-   --subnet $snet_n_devops \
-   --image $devops_vm_img \
-   --admin-username $user_n_test \
-   --generate-ssh-keys \
-   --public-ip-address "" \
-   --nsg "" \
-   --nsg-rule NONE \
-   --tags $tags
-
-   # vm scale set agents
-   az vmss create \
-   --name $devops_vm_n \
-   --resource-group $app_rg \
-   --image $devops_vm_img \
-   --vm-sku Standard_D2_v3 \
-   --storage-sku StandardSSD_LRS \
-   --authentication-type SSH \
-   --vnet-name $vnet_n \
-   --subnet $snet_n_devops \
-   --instance-count 2 \
-   --disable-overprovision \
-   --upgrade-policy-mode manual \
-   --single-placement-group false \
-   --platform-fault-domain-count 1 \
-   --load-balancer "" \
-   --assign-identity \
-   --admin-username $user_n_test \
-   --tags $tags
-
-   # EXPECTED RESULT {"clientId": "msi"}
-   az aks show -g $app_rg -n $aks_cluster_n --query "servicePrincipalProfile"
-
-   # ----
-   # IF not msi result enable AKS managed identity
-   az aks update -g $app_rg -n $aks_cluster_n --enable-managed-identity
-   #  to complete the update to managed identity upgrade the nodepools. e.g.
-   az aks nodepool upgrade --node-image-only -g $app_rg --cluster-name $aks_cluster_n -n nodepool1
-   # ----
-
-   # Configure the VMSS with a system-managed identity to grant access to the container registry
-   SP_VMSS_ID=$(az vmss show --resource-group $app_rg --name $devops_vm_n --query identity.principalId --out tsv); echo $SP_VMSS_ID
-
-   # Grant the AzDevOps VMSS system managed identity access to the ACR
-   ACR_ID=$(az acr show --name $acr_n --query 'id' --output tsv);   echo $ACR_ID
-   az role assignment create --assignee $SP_VMSS_ID --scope $ACR_ID --role acrpush
-
-
-   # Grant the AzDevOps VMSS system managed identity access to the AKS
-   AKS_ID=$(az aks show --name $aks_cluster_n -g $app_rg --query 'id' --output tsv);   echo $AKS_ID
-   az role assignment create --assignee $SP_VMSS_ID --scope $AKS_ID --role Contributor
-
-   # Validate both ACR and AKS roles
-   az role assignment list --assignee $SP_VMSS_ID --scope $ACR_ID
-   az role assignment list --assignee $SP_VMSS_ID --scope $AKS_ID
-
-   # You can't RDP from outside the vnet to the vm because it ONLY has a private IP and the NSG associated does not allow RDP by default, we overcome this with a Bastion :)
+   # Integrate the ACR with an existing AKS (this creates a system managed identity)
+   # it authorizes the ACR in your subscription and configures the appropriate ACRPull role for the managed identity.
+   # get ACR ID
+   ACR_ID=$(az acr show --name ${acr_n}publict --query 'id' --output tsv); echo $ACR_ID
+   # Attach ACR to AKS
+   az aks update \
+   -n $aks_cluster_n \
+   -g $app_rg \
+   --attach-acr $ACR_ID
    ```
 
-10. ### Create a Bastion agent
+10. ### Create an AzureDevOps agent
+
+    ```bash
+    # test vm that could also be used as DevOps Agent (scale sets recommend though)
+    az vm create \
+    --resource-group $app_rg \
+    --name $devops_vm_n \
+    --vnet-name $vnet_n \
+    --subnet $snet_n_devops \
+    --image $devops_vm_img \
+    --admin-username $user_n_test \
+    --generate-ssh-keys \
+    --public-ip-address "" \
+    --nsg "" \
+    --nsg-rule NONE \
+    --tags $tags
+
+    # vm scale set agents
+    az vmss create \
+    --name $devops_vm_n \
+    --resource-group $app_rg \
+    --image $devops_vm_img \
+    --vm-sku Standard_D2_v3 \
+    --storage-sku StandardSSD_LRS \
+    --authentication-type SSH \
+    --vnet-name $vnet_n \
+    --subnet $snet_n_devops \
+    --instance-count 2 \
+    --disable-overprovision \
+    --upgrade-policy-mode manual \
+    --single-placement-group false \
+    --platform-fault-domain-count 1 \
+    --load-balancer "" \
+    --assign-identity \
+    --admin-username $user_n_test \
+    --tags $tags
+
+    # EXPECTED RESULT {"clientId": "msi"}
+    az aks show -g $app_rg -n $aks_cluster_n --query "servicePrincipalProfile"
+
+    # ----
+    # IF not msi result enable AKS managed identity
+    az aks update -g $app_rg -n $aks_cluster_n --enable-managed-identity
+    #  to complete the update to managed identity upgrade the nodepools. e.g.
+    az aks nodepool upgrade --node-image-only -g $app_rg --cluster-name $aks_cluster_n -n nodepool1
+    # ----
+
+    # Configure the VMSS with a system-managed identity to grant access to the container registry
+    SP_VMSS_ID=$(az vmss show --resource-group $app_rg --name $devops_vm_n --query identity.principalId --out tsv); echo $SP_VMSS_ID
+
+    # Grant the AzDevOps VMSS system managed identity access to the ACR
+    ACR_ID=$(az acr show --name $acr_n --query 'id' --output tsv);   echo $ACR_ID
+    az role assignment create --assignee $SP_VMSS_ID --scope $ACR_ID --role acrpush
+
+
+    # Grant the AzDevOps VMSS system managed identity access to the AKS
+    AKS_ID=$(az aks show --name $aks_cluster_n -g $app_rg --query 'id' --output tsv);   echo $AKS_ID
+    az role assignment create --assignee $SP_VMSS_ID --scope $AKS_ID --role Contributor
+
+    # Validate both ACR and AKS roles
+    az role assignment list --assignee $SP_VMSS_ID --scope $ACR_ID
+    az role assignment list --assignee $SP_VMSS_ID --scope $AKS_ID
+
+    # You can't RDP from outside the vnet to the vm because it ONLY has a private IP and the NSG associated does not allow RDP by default, we overcome this with a Bastion :)
+    ```
+
+11. ### Create a Bastion agent
 
     ```bash
     # Bastion Public IP
@@ -609,7 +619,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
     --location $l
     ```
 
-11. ### Test Private Endpoint DNS Resolution
+12. ### Test Private Endpoint DNS Resolution
 
     ```bash
     # ssh azureuser@publicIpAddress
@@ -663,7 +673,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
     kubectl get no
     ```
 
-12. ### Create and Setup an Azure SQL Managed Identity
+13. ### Create and Setup an Azure SQL Managed Identity
 
     [Review Network Requirements][29]
 
@@ -706,7 +716,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
     --tags $tags
     ```
 
-13. ### Cleanup resources
+14. ### Cleanup resources
 
     ```bash
     az group delete -n $app_rg -y --no-wait
