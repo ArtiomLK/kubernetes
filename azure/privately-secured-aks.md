@@ -52,7 +52,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    # Main Vars
    # ---
    app="confidential";                 echo $app
-   env="dev";                          echo $env
+   env="prod";                         echo $env
    l="eastus2";                        echo $l
    tags="env=$env app=$app";           echo $tags
    user_n_test="artiomlk";             echo $user_n_test
@@ -85,7 +85,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    #Private Endpoints
    snet_n_pe="snet-$app-$env-pe";         echo $snet_n_pe
    snet_addr_pe="$vnet_pre.3.0/24";       echo $snet_addr_pe
-   nsg_n_pe="nsg-$app-$env-pe";      echo $nsg_n_pe
+   nsg_n_pe="nsg-$app-$env-pe";           echo $nsg_n_pe
    #SQL_MANAGED_INSTANCE
    snet_n_sqlmi="snet-$app-$env-sqlmi";   echo $snet_n_sqlmi
    snet_addr_sqlmi="$vnet_pre.4.0/24";    echo $snet_addr_sqlmi
@@ -141,7 +141,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --tags $tags
    ```
 
-3. ### Create Main Vnet
+3. ### Create Main vNet
 
    ```bash
    # Main vNet
