@@ -85,6 +85,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    #Private Endpoints
    snet_n_pe="snet-$app-$env-pe";         echo $snet_n_pe
    snet_addr_pe="$vnet_pre.3.0/24";       echo $snet_addr_pe
+   nsg_n_pe="nsg-$app-$env-pe";           echo $nsg_n_pe
    #SQL_MANAGED_INSTANCE
    snet_n_sqlmi="snet-$app-$env-sqlmi";   echo $snet_n_sqlmi
    snet_addr_sqlmi="$vnet_pre.4.0/24";    echo $snet_addr_sqlmi
@@ -130,7 +131,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    sqlmi_pass="Password1234567890!";     echo $sqlmi_pass
    ```
 
-2. ### Create Main App Resource Group
+2. ### Create Main Resource Group
 
    ```bash
    # Create a resource group where our app resources will be created, e.g. AKS, ACR, vNets...
@@ -140,7 +141,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --tags $tags
    ```
 
-3. ### Create Topology
+3. ### Create Main vNet
 
    ```bash
    # Main vNet
@@ -150,7 +151,11 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --address-prefixes $vnet_addr \
    --location $l \
    --tags $tags
+   ```
 
+4. ### Create Remaining Topology
+
+   ```bash
    # Default NSG
    az network nsg create \
    --resource-group $app_rg \
@@ -281,14 +286,6 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --address-prefixes $snet_addr_devops \
    --network-security-group $nsg_n_default
 
-   # Private Endpoint Subnet
-   az network vnet subnet create \
-   --resource-group $app_rg \
-   --vnet-name $vnet_n \
-   --name $snet_n_pe \
-   --address-prefixes $snet_addr_pe \
-   --network-security-group $nsg_n_default
-
    # default SQLMI NSG
    az network nsg create \
    --name $nsg_n_sqlmi \
@@ -313,7 +310,38 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --address-prefixes $snet_addr_aks
    ```
 
-4. ### Create the Azure Container Registry (ACR)
+5. ### Setup Private Link Subnet
+
+   ```bash
+   # Private Endpoint NSG with Default rules
+   az network nsg create \
+   --resource-group $app_rg \
+   --name $nsg_n_pe \
+   --location $l \
+   --tags $tags
+
+   # Private Endpoint Subnet
+   az network vnet subnet create \
+   --resource-group $app_rg \
+   --vnet-name $vnet_n \
+   --name $snet_n_pe \
+   --address-prefixes $snet_addr_pe \
+   --network-security-group $nsg_n_pe \
+   --disable-private-endpoint-network-policies
+
+   # Disable network policies in the private endpoint subnet IF ENABLED
+   az network vnet subnet update \
+   --vnet-name $vnet_n \
+   --name $snet_n_pe \
+   --resource-group $app_rg \
+   --disable-private-endpoint-network-policies
+   ```
+
+6. ### Create a Private Azure Container Registry (ACR)
+
+   1. [Create a Resource Group][102]
+   1. [Create a vNet][100]
+   1. [Create and setup a private link sNet][101]
 
    ```bash
    # Create a private ACR
@@ -325,35 +353,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --public-network-enabled false \
    --tags $tags
 
-   # [OPTIONALLY] Integrate the ACR with an existing AKS (this creates a system managed identity)
-   # it authorizes the ACR in your subscription and configures the appropriate ACRPull role for the managed identity.
-   # get ACR ID
-   ACR_ID=$(az acr show --name $acr_n --query 'id' --output tsv);   echo $ACR_ID
-   az aks update \
-   -n myAKSCluster \
-   -g $app_rg \
-   --attach-acr $ACR_ID
-
-   # [OPTIONALLY] Create a public ACR to see the difference
-   az acr create \
-   --name "${acr_n}publict" \
-   --resource-group $app_rg \
-   --location $l \
-   --sku $acr_sku \
-   --public-network-enabled true \
-   --tags $tags
-   ```
-
-5. ### Create a private Link to ACR
-
-   ```bash
-   # Disable network policies in the private endpoint subnet
-   az network vnet subnet update \
-   --vnet-name $vnet_n \
-   --name $snet_n_pe \
-   --resource-group $app_rg \
-   --disable-private-endpoint-network-policies
-
+   # Create a private Link to our Private ACR
    # Create a Custom Private DNS
    # The FQDN of the services resolves automatically to a public IP address. To resolve to the private IP address of the private endpoint, change your DNS configuration.
    az network private-dns zone create \
@@ -435,7 +435,29 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --ipv4-address $DATA_ENDPOINT_PRIVATE_IP
    ```
 
-6. ### Create the Azure Kubernetes Service (AKS)
+7. ### Create a public Azure Container Registry (ACR)
+
+   ```bash
+   # [OPTIONALLY] Create a public ACR
+   az acr create \
+   --name "${acr_n}publict" \
+   --resource-group $app_rg \
+   --location $l \
+   --sku $acr_sku \
+   --public-network-enabled true \
+   --tags $tags
+
+   # [OPTIONALLY] Integrate the ACR with an existing AKS (this creates a system managed identity)
+   # it authorizes the ACR in your subscription and configures the appropriate ACRPull role for the managed identity.
+   # get ACR ID
+   ACR_ID=$(az acr show --name ${acr_n}publict --query 'id' --output tsv); echo $ACR_ID
+   az aks update \
+   -n myAKSCluster \
+   -g $app_rg \
+   --attach-acr $ACR_ID
+   ```
+
+8. ### Create the Azure Kubernetes Service (AKS)
 
    ```bash
    # Create an User Managed Identity
@@ -501,7 +523,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
 
    _If you don't have a network watcher enabled in the region that the virtual network you want to generate a topology for is in, network watchers are automatically created for you in all regions. The network watchers are created in a resource group named NetworkWatcherRG._
 
-7. ### Create an AzureDevOps agent
+9. ### Create an AzureDevOps agent
 
    ```bash
    # test vm that could also be used as DevOps Agent (scale sets recommend though)
@@ -567,81 +589,81 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    # You can't RDP from outside the vnet to the vm because it ONLY has a private IP and the NSG associated does not allow RDP by default, we overcome this with a Bastion :)
    ```
 
-8. ### Create a Bastion agent
+10. ### Create a Bastion agent
 
-   ```bash
-   # Bastion Public IP
-   az network public-ip create \
-   --resource-group $app_rg \
-   --name $bastion_pip \
-   --sku Standard \
-   --zone 1 2 3 \
-   --location $l
+    ```bash
+    # Bastion Public IP
+    az network public-ip create \
+    --resource-group $app_rg \
+    --name $bastion_pip \
+    --sku Standard \
+    --zone 1 2 3 \
+    --location $l
 
-   # Bastion (it takes a while go get some coffee)
-   az network bastion create \
-   --name $bastion_n \
-   --public-ip-address $bastion_pip \
-   --resource-group $app_rg \
-   --vnet-name $vnet_n \
-   --location $l
-   ```
+    # Bastion (it takes a while go get some coffee)
+    az network bastion create \
+    --name $bastion_n \
+    --public-ip-address $bastion_pip \
+    --resource-group $app_rg \
+    --vnet-name $vnet_n \
+    --location $l
+    ```
 
-9. ### Test Private Endpoint DNS Resolution
+11. ### Test Private Endpoint DNS Resolution
 
-   ```bash
-   # ssh azureuser@publicIpAddress
-   # https://docs.microsoft.com/en-us/azure/container-registry/container-registry-private-link#validate-private-link-connection
-   # validate ACR DNS resolution to private link
-   nslookup $REGISTRY_NAME.azurecr.io
-   dig $REGISTRY_NAME.azurecr.io
+    ```bash
+    # ssh azureuser@publicIpAddress
+    # https://docs.microsoft.com/en-us/azure/container-registry/container-registry-private-link#validate-private-link-connection
+    # validate ACR DNS resolution to private link
+    nslookup $REGISTRY_NAME.azurecr.io
+    dig $REGISTRY_NAME.azurecr.io
 
-   # validate AKS DNS resolution to private link
-   nslookup aks-confid-rg-confidential--5f96bd-84e3fa29.privatelink.eastus2.azmk8s.io
-   dig aks-confid-rg-confidential--5f96bd-84e3fa29.privatelink.eastus2.azmk8s.io
+    # validate AKS DNS resolution to private link
+    nslookup aks-confid-rg-confidential--5f96bd-84e3fa29.privatelink.eastus2.azmk8s.io
+    dig aks-confid-rg-confidential--5f96bd-84e3fa29.privatelink.eastus2.azmk8s.io
 
-   # Install Docker
-   sudo apt-get update
-   sudo apt install docker.io -y
-   # Test Docker Installation
-   sudo docker run -it hello-world
+    # Install Docker
+    sudo apt-get update
+    sudo apt install docker.io -y
+    # Test Docker Installation
+    sudo docker run -it hello-world
 
-   # Install the Azure CLI
-   curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+    # Install the Azure CLI
+    curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-   # Install kubectl
-   curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-   curl -LO "https://dl.k8s.io/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
-   sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+    # Install kubectl
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    curl -LO "https://dl.k8s.io/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+    sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
-   # Test that an az VMSS instance can connect to the Private ACR
-   sudo az login --identity
-   echo $acr_n
-   sudo az acr login -n $acr_n
-   sudo az acr repository list --name $acr_n --output table
+    # Test that an az VMSS instance can connect to the Private ACR
+    sudo az login --identity
+    echo $acr_n
+    sudo az acr login -n $acr_n
+    sudo az acr repository list --name $acr_n --output table
 
-   # PUSH AN IMAGE TO ACR
-   echo $acr_n
-   sudo docker pull mcr.microsoft.com/oss/nginx/nginx:1.15.5-alpine
-   sudo docker tag mcr.microsoft.com/oss/nginx/nginx:1.15.5-alpine $acr_n.azurecr.io/myrepo/nginx:1.0.0
-   sudo docker push $acr_n.azurecr.io/myrepo/nginx:1.0.0
+    # PUSH AN IMAGE TO ACR
+    echo $acr_n
+    sudo docker pull mcr.microsoft.com/oss/nginx/nginx:1.15.5-alpine
+    sudo docker tag mcr.microsoft.com/oss/nginx/nginx:1.15.5-alpine $acr_n.azurecr.io/myrepo/nginx:1.0.0
+    sudo docker push $acr_n.azurecr.io/myrepo/nginx:1.0.0
 
-   # Test if image was successfully pushed to private ACR
-   echo $acr_n
-   sudo az acr repository list --name $acr_n --output table
+    # Test if image was successfully pushed to private ACR
+    echo $acr_n
+    sudo az acr repository list --name $acr_n --output table
 
-   ## ANY QUESTION ABOUT ACR?
-   ## IF NOT LETS MOVE TO AKS TESTS
+    ## ANY QUESTION ABOUT ACR?
+    ## IF NOT LETS MOVE TO AKS TESTS
 
-   # VALIDATE that the VMSS instances connect to the AKS connection and authenticate
-   az login --identity
-   echo $aks_cluster_n
-   echo $app_rg
-   az aks get-credentials -n $aks_cluster_n -g $app_rg
-   kubectl get no
-   ```
+    # VALIDATE that the VMSS instances connect to the AKS connection and authenticate
+    az login --identity
+    echo $aks_cluster_n
+    echo $app_rg
+    az aks get-credentials -n $aks_cluster_n -g $app_rg
+    kubectl get no
+    ```
 
-10. ### Create and Setup an Azure SQL Managed Identity
+12. ### Create and Setup an Azure SQL Managed Identity
 
     [Review Network Requirements][29]
 
@@ -684,7 +706,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
     --tags $tags
     ```
 
-11. ### Cleanup resources
+13. ### Cleanup resources
 
     ```bash
     az group delete -n $app_rg -y --no-wait
@@ -771,3 +793,6 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
 [31]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/subnet-service-aided-configuration-enable
 [32]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/connection-types-overview
 [33]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/connect-vm-instance-configure
+[100]: #create-main-vnet
+[101]: #setup-private-link-subnet
+[102]: #create-main-resource-group
