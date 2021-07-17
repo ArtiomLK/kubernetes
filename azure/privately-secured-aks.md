@@ -51,67 +51,57 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    # ---
    # Main Vars
    # ---
-   app="confidential";                 echo $app
-   env="prod";                         echo $env
-   l="eastus2";                        echo $l
-   tags="env=$env app=$app";           echo $tags
-   user_n_test="artiomlk";             echo $user_n_test
-   user_pass_test="Password123!";      echo $user_pass_test
+   app="confidential";                          echo $app
+   env="prod";                                  echo $env
+   l="eastus2";                                 echo $l
+   tags="env=$env app=$app";                    echo $tags
+   user_n_test="artiomlk";                      echo $user_n_test
+   user_pass_test="Password123!";               echo $user_pass_test
 
-   log_rg="rg-log-$app-$env";          echo $log_rg
-   log_n="log-$app-$env";              echo $log_n
+   log_rg="rg-log-$app-$env";                   echo $log_rg
+   log_n="log-$app-$env";                       echo $log_n
 
-   app_rg="rg-$app-$env";              echo $app_rg
-   arm_sc_n="sc-sub-alk";              echo $arm_sc_n
-   acr_sc_n="acr-sc-$env";             echo $acr_sc_n
+   app_rg="rg-$app-$env";                       echo $app_rg
+   arm_sc_n="sc-sub-alk";                       echo $arm_sc_n
+   acr_sc_n="acr-sc-$env";                      echo $acr_sc_n
 
    # ---
    # NETWORK TOPOLOGY
    # ---
-   #NSG
-   nsg_n_default="nsg-$app-$env-default"; echo $nsg_n_default
-   nsg_n_bastion="nsg-$app-$env-bastion"; echo $nsg_n_bastion
-   nsg_n_sqlmi="nsg-$app-$env-sqlmi";     echo $nsg_n_sqlmi
-   #VNET
-   vnet_pre="10.5";                       echo $vnet_pre
-   vnet_n="vnet-$app-$env";               echo $vnet_n
-   vnet_addr="$vnet_pre.0.0/16";          echo $vnet_addr
-   #Bastion
-   snet_n_bas="AzureBastionSubnet";       echo $snet_n_bas
-   snet_addr_bas="$vnet_pre.1.0/27";      echo $snet_addr_bas
-   #Private Endpoints
-   snet_n_pe="snet-$app-$env-pe";         echo $snet_n_pe
-   snet_addr_pe="$vnet_pre.3.0/24";       echo $snet_addr_pe
-   nsg_n_pe="nsg-$app-$env-pe";           echo $nsg_n_pe
-   #SQL_MANAGED_INSTANCE
-   snet_n_sqlmi="snet-$app-$env-sqlmi";   echo $snet_n_sqlmi
-   snet_addr_sqlmi="$vnet_pre.4.0/24";    echo $snet_addr_sqlmi
-   #AKSs
-   snet_n_aks="snet-$app-$env-aks";       echo $snet_n_aks
-   snet_addr_aks="$vnet_pre.8.0/21";      echo $snet_addr_aks
+   vnet_pre="10.5";                             echo $vnet_pre
+   vnet_n="vnet-$app-$env";                     echo $vnet_n
+   vnet_addr="$vnet_pre.0.0/16";                echo $vnet_addr
 
    # ---
    # ACR
    # ---
-   acr_n="cr$app$env";                    echo $acr_n
-   acr_sku="Premium";                     echo $acr_sku
-   dns_link="dnslink-$acr_n";             echo $dns_link
-   pe_n="pe-$acr_n";                      echo $pe_n
+   snet_n_pe="snet-$app-$env-pe";               echo $snet_n_pe
+   snet_addr_pe="$vnet_pre.3.0/24";             echo $snet_addr_pe
+   nsg_n_pe="nsg-$app-$env-pe";                 echo $nsg_n_pe
+   acr_n="cr$app$env";                          echo $acr_n
+   acr_sku="Premium";                           echo $acr_sku
+   dns_link="dnslink-$acr_n";                   echo $dns_link
+   pe_n="pe-$acr_n";                            echo $pe_n
 
    # ---
    # AKS
    # ---
-   aks_cluster_n="aks-$app-$env";         echo $aks_cluster_n
-   aks_cluster_count="3";                 echo $aks_cluster_count
-   aks_v="1.20.7";                        echo $aks_v
-   aks_node_size="Standard_B2s";          echo $aks_node_size
-   aks_id_n="id-$app-$env";               echo $aks_id_n
+   snet_n_aks="snet-$app-$env-aks";             echo $snet_n_aks
+   snet_addr_aks="$vnet_pre.8.0/21";            echo $snet_addr_aks
+   aks_cluster_n="aks-$app-$env";               echo $aks_cluster_n
+   aks_cluster_count="3";                       echo $aks_cluster_count
+   aks_v="1.20.7";                              echo $aks_v
+   aks_node_size="Standard_B2s";                echo $aks_node_size
+   aks_id_n="id-$app-$env";                     echo $aks_id_n
 
    # ---
    # Bastion
    # ---
-   bastion_n="bastion-$app-$env";            echo $bastion_n
-   bastion_pip="pip-bastion-$app-$env";      echo $bastion_pip
+   snet_n_bas="AzureBastionSubnet";             echo $snet_n_bas
+   snet_addr_bas="$vnet_pre.1.0/27";            echo $snet_addr_bas
+   nsg_n_bastion="nsg-$app-$env-bastion";       echo $nsg_n_bastion
+   bastion_n="bastion-$app-$env";               echo $bastion_n
+   bastion_pip="pip-bastion-$app-$env";         echo $bastion_pip
 
    # ---
    # DevOps Agents (scale set recommended though)
@@ -125,10 +115,13 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    # ---
    # SQLMI
    # ---
-   sqlmi_n="sqlmi-$app-$env";            echo $sqlmi_n
-   sqlmi_rt_n="rt-sqlmi-$app-$env";      echo $sqlmi_rt_n
-   sqlmi_login="artiomlk";               echo $sqlmi_login
-   sqlmi_pass="Password1234567890!";     echo $sqlmi_pass
+   snet_n_sqlmi="snet-$app-$env-sqlmi";         echo $snet_n_sqlmi
+   snet_addr_sqlmi="$vnet_pre.4.0/24";          echo $snet_addr_sqlmi
+   nsg_n_sqlmi="nsg-$app-$env-sqlmi";           echo $nsg_n_sqlmi
+   sqlmi_n="sqlmi-$app-$env";                   echo $sqlmi_n
+   sqlmi_rt_n="rt-sqlmi-$app-$env";             echo $sqlmi_rt_n
+   sqlmi_login="artiomlk";                      echo $sqlmi_login
+   sqlmi_pass="Password1234567890!";            echo $sqlmi_pass
    ```
 
 2. ### Create Main Resource Group
@@ -153,18 +146,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --tags $tags
    ```
 
-4. ### Create Remaining Topology
-
-   ```bash
-   # Default NSG
-   az network nsg create \
-   --resource-group $app_rg \
-   --name $nsg_n_default \
-   --location $l \
-   --tags $tags
-   ```
-
-5. ### Setup Private Link Subnet
+4. ### Setup Private Link Subnet
 
    ```bash
    # Private Endpoint NSG with Default rules
@@ -191,7 +173,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --disable-private-endpoint-network-policies
    ```
 
-6. ### Create a Private Azure Container Registry (ACR)
+5. ### Create a Private Azure Container Registry (ACR)
 
    1. [Create a Resource Group][102]
    1. [Create a vNet][100]
@@ -289,7 +271,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --ipv4-address $DATA_ENDPOINT_PRIVATE_IP
    ```
 
-7. ### Create a public Azure Container Registry (ACR)
+6. ### Create a public Azure Container Registry (ACR)
 
    ```bash
    # [OPTIONALLY] Create a public ACR
@@ -302,7 +284,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --tags $tags
    ```
 
-8. ### Create a private Azure Kubernetes Service (AKS) with Kubenet
+7. ### Create a private Azure Kubernetes Service (AKS) with Kubenet
 
    1. [Create a Resource Group][102]
    1. [Create a vNet][100]
@@ -380,7 +362,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
 
    _If you don't have a network watcher enabled in the region that the virtual network you want to generate a topology for is in, network watchers are automatically created for you in all regions. The network watchers are created in a resource group named NetworkWatcherRG._
 
-9. ### AKS to ACR Integration
+8. ### AKS to ACR Integration
 
    ```bash
    # Integrate the ACR with an existing AKS (this creates a system managed identity)
@@ -394,91 +376,91 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --attach-acr $ACR_ID
    ```
 
-10. ### Create an AzureDevOps agent
+9. ### Create an AzureDevOps agent
 
-    1. [Create a Resource Group][102]
-    1. [Create a vNet][100]
+   1. [Create a Resource Group][102]
+   1. [Create a vNet][100]
 
-    ```bash
-    # DevOps NSG with Default rules
-    az network nsg create \
-    --resource-group $app_rg \
-    --name $nsg_n_devops \
-    --location $l \
-    --tags $tags
+   ```bash
+   # DevOps NSG with Default rules
+   az network nsg create \
+   --resource-group $app_rg \
+   --name $nsg_n_devops \
+   --location $l \
+   --tags $tags
 
-    # DevOps Subnet
-    az network vnet subnet create \
-    --resource-group $app_rg \
-    --vnet-name $vnet_n \
-    --name $snet_n_devops \
-    --address-prefixes $snet_addr_devops \
-    --network-security-group $nsg_n_devops
+   # DevOps Subnet
+   az network vnet subnet create \
+   --resource-group $app_rg \
+   --vnet-name $vnet_n \
+   --name $snet_n_devops \
+   --address-prefixes $snet_addr_devops \
+   --network-security-group $nsg_n_devops
 
-    # test vm that could also be used as DevOps Agent (scale sets recommend though)
-    az vm create \
-    --resource-group $app_rg \
-    --name $devops_vm_n \
-    --vnet-name $vnet_n \
-    --subnet $snet_n_devops \
-    --image $devops_vm_img \
-    --admin-username $user_n_test \
-    --generate-ssh-keys \
-    --public-ip-address "" \
-    --nsg "" \
-    --nsg-rule NONE \
-    --tags $tags
+   # test vm that could also be used as DevOps Agent (scale sets recommend though)
+   az vm create \
+   --resource-group $app_rg \
+   --name $devops_vm_n \
+   --vnet-name $vnet_n \
+   --subnet $snet_n_devops \
+   --image $devops_vm_img \
+   --admin-username $user_n_test \
+   --generate-ssh-keys \
+   --public-ip-address "" \
+   --nsg "" \
+   --nsg-rule NONE \
+   --tags $tags
 
-    # vm scale set agents
-    az vmss create \
-    --name $devops_vm_n \
-    --resource-group $app_rg \
-    --image $devops_vm_img \
-    --vm-sku Standard_D2_v3 \
-    --storage-sku StandardSSD_LRS \
-    --authentication-type SSH \
-    --vnet-name $vnet_n \
-    --subnet $snet_n_devops \
-    --instance-count 2 \
-    --disable-overprovision \
-    --upgrade-policy-mode manual \
-    --single-placement-group false \
-    --platform-fault-domain-count 1 \
-    --load-balancer "" \
-    --assign-identity \
-    --admin-username $user_n_test \
-    --tags $tags
+   # vm scale set agents
+   az vmss create \
+   --name $devops_vm_n \
+   --resource-group $app_rg \
+   --image $devops_vm_img \
+   --vm-sku Standard_D2_v3 \
+   --storage-sku StandardSSD_LRS \
+   --authentication-type SSH \
+   --vnet-name $vnet_n \
+   --subnet $snet_n_devops \
+   --instance-count 2 \
+   --disable-overprovision \
+   --upgrade-policy-mode manual \
+   --single-placement-group false \
+   --platform-fault-domain-count 1 \
+   --load-balancer "" \
+   --assign-identity \
+   --admin-username $user_n_test \
+   --tags $tags
 
-    # EXPECTED RESULT {"clientId": "msi"}
-    az aks show -g $app_rg -n $aks_cluster_n --query "servicePrincipalProfile"
+   # EXPECTED RESULT {"clientId": "msi"}
+   az aks show -g $app_rg -n $aks_cluster_n --query "servicePrincipalProfile"
 
-    # ----
-    # IF not msi result enable AKS managed identity
-    az aks update -g $app_rg -n $aks_cluster_n --enable-managed-identity
-    #  to complete the update to managed identity upgrade the nodepools. e.g.
-    az aks nodepool upgrade --node-image-only -g $app_rg --cluster-name $aks_cluster_n -n nodepool1
-    # ----
+   # ----
+   # IF not msi result enable AKS managed identity
+   az aks update -g $app_rg -n $aks_cluster_n --enable-managed-identity
+   #  to complete the update to managed identity upgrade the nodepools. e.g.
+   az aks nodepool upgrade --node-image-only -g $app_rg --cluster-name $aks_cluster_n -n nodepool1
+   # ----
 
-    # Configure the VMSS with a system-managed identity to grant access to the container registry
-    SP_VMSS_ID=$(az vmss show --resource-group $app_rg --name $devops_vm_n --query identity.principalId --out tsv); echo $SP_VMSS_ID
+   # Configure the VMSS with a system-managed identity to grant access to the container registry
+   SP_VMSS_ID=$(az vmss show --resource-group $app_rg --name $devops_vm_n --query identity.principalId --out tsv); echo $SP_VMSS_ID
 
-    # Grant the AzDevOps VMSS system managed identity access to the ACR
-    ACR_ID=$(az acr show --name $acr_n --query 'id' --output tsv);   echo $ACR_ID
-    az role assignment create --assignee $SP_VMSS_ID --scope $ACR_ID --role acrpush
+   # Grant the AzDevOps VMSS system managed identity access to the ACR
+   ACR_ID=$(az acr show --name $acr_n --query 'id' --output tsv);   echo $ACR_ID
+   az role assignment create --assignee $SP_VMSS_ID --scope $ACR_ID --role acrpush
 
 
-    # Grant the AzDevOps VMSS system managed identity access to the AKS
-    AKS_ID=$(az aks show --name $aks_cluster_n -g $app_rg --query 'id' --output tsv);   echo $AKS_ID
-    az role assignment create --assignee $SP_VMSS_ID --scope $AKS_ID --role Contributor
+   # Grant the AzDevOps VMSS system managed identity access to the AKS
+   AKS_ID=$(az aks show --name $aks_cluster_n -g $app_rg --query 'id' --output tsv);   echo $AKS_ID
+   az role assignment create --assignee $SP_VMSS_ID --scope $AKS_ID --role Contributor
 
-    # Validate both ACR and AKS roles
-    az role assignment list --assignee $SP_VMSS_ID --scope $ACR_ID
-    az role assignment list --assignee $SP_VMSS_ID --scope $AKS_ID
+   # Validate both ACR and AKS roles
+   az role assignment list --assignee $SP_VMSS_ID --scope $ACR_ID
+   az role assignment list --assignee $SP_VMSS_ID --scope $AKS_ID
 
-    # You can't RDP from outside the vnet to the vm because it ONLY has a private IP and the NSG associated does not allow RDP by default, we overcome this with a Bastion :)
-    ```
+   # You can't RDP from outside the vnet to the vm because it ONLY has a private IP and the NSG associated does not allow RDP by default, we overcome this with a Bastion :)
+   ```
 
-11. ### Create a Bastion agent
+10. ### Create a Bastion agent
 
     1. [Create a Resource Group][102]
     1. [Create a vNet][100]
@@ -614,7 +596,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
     --location $l
     ```
 
-12. ### Test Private Endpoint DNS Resolution
+11. ### Test Private Endpoint DNS Resolution
 
     ```bash
     # ssh azureuser@publicIpAddress
@@ -668,7 +650,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
     kubectl get no
     ```
 
-13. ### Create and Setup an Azure SQL Managed Identity
+12. ### Create and Setup an Azure SQL Managed Identity
 
     1. [Review Network Requirements][29]
     1. [Create a Resource Group][102]
@@ -729,7 +711,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
     --tags $tags
     ```
 
-14. ### Cleanup resources
+13. ### Cleanup resources
 
     ```bash
     az group delete -n $app_rg -y --no-wait
