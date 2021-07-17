@@ -81,7 +81,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
    # ---
    # NETWORK TOPOLOGY
    # ---
-   vnet_pre="10.5";                             echo $vnet_pre
+   vnet_pre="172.16";                           echo $vnet_pre
    vnet_n="vnet-$app-$env";                     echo $vnet_n
    vnet_addr="$vnet_pre.0.0/16";                echo $vnet_addr
 
@@ -756,6 +756,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
 - [MS | Docs | Use managed identities in Azure Kubernetes Service][21]
 - [MS | Docs | Network concepts for applications in Azure Kubernetes Service (AKS)][23]
 - [MS | Docs | Use kubenet networking with your own IP address ranges in Azure Kubernetes Service (AKS)][24]
+- [MS | Docs | Best practices for cluster isolation in Azure Kubernetes Service (AKS)][34]
 - DNS
 - [MS | Docs | What is Azure Private DNS?][25]
 - [MS | Docs | What is the auto registration feature in Azure DNS private zones?][8]
@@ -820,6 +821,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
 [31]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/subnet-service-aided-configuration-enable
 [32]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/connection-types-overview
 [33]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/connect-vm-instance-configure
+[34]: https://docs.microsoft.com/en-us/azure/aks/operator-best-practices-cluster-isolation
 [100]: #create-main-vnet
 [101]: #setup-private-link-subnet
 [102]: #create-main-resource-group
