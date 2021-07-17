@@ -368,7 +368,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    # Integrate the ACR with an existing AKS (this creates a system managed identity)
    # it authorizes the ACR in your subscription and configures the appropriate ACRPull role for the managed identity.
    # get ACR ID
-   ACR_ID=$(az acr show --name ${acr_n}publict --query 'id' --output tsv); echo $ACR_ID
+   ACR_ID=$(az acr show --name ${acr_n} --query 'id' --output tsv); echo $ACR_ID
    # Attach ACR to AKS
    az aks update \
    -n $aks_cluster_n \
@@ -433,13 +433,15 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
 
    # EXPECTED RESULT {"clientId": "msi"}
    az aks show -g $app_rg -n $aks_cluster_n --query "servicePrincipalProfile"
-
    # ----
    # IF not msi result enable AKS managed identity
-   az aks update -g $app_rg -n $aks_cluster_n --enable-managed-identity
-   #  to complete the update to managed identity upgrade the nodepools. e.g.
-   az aks nodepool upgrade --node-image-only -g $app_rg --cluster-name $aks_cluster_n -n nodepool1
+   # ---
+   # az aks update -g $app_rg -n $aks_cluster_n --enable-managed-identity
    # ----
+   # To complete the update to managed identity upgrade the nodepools. e.g.
+   # ----
+   # az aks nodepool upgrade --node-image-only -g $app_rg --cluster-name $aks_cluster_n -n nodepool1
+
 
    # Configure the VMSS with a system-managed identity to grant access to the container registry
    SP_VMSS_ID=$(az vmss show --resource-group $app_rg --name $devops_vm_n --query identity.principalId --out tsv); echo $SP_VMSS_ID
@@ -643,11 +645,16 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
     ## IF NOT LETS MOVE TO AKS TESTS
 
     # VALIDATE that the VMSS instances connect to the AKS connection and authenticate
-    az login --identity
+    sudo az login --identity
     echo $aks_cluster_n
     echo $app_rg
     az aks get-credentials -n $aks_cluster_n -g $app_rg
     kubectl get no
+
+    # Upload nginx sample app
+    kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/kubernetes/main/definitionFiles/deploy/deploy-nginx-w-replicas.yaml
+    # Create a Service Load Balancer to expose nginx through a public ip
+    kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/kubernetes/main/definitionFiles/service/loadBalancer/svc-nginx-to-deploy.yaml
     ```
 
 12. ### Create and Setup an Azure SQL Managed Identity
