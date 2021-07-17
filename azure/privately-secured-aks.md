@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Connect privately to Azure Kubernetes Services and Azure Container Registry using Azure Private Links
+Azure Kubernetes Services private cluster architectural design. Connect to an Azure Kubernetes Services private cluster by using Azure Private Links.
 
 ### Resources
 
@@ -16,6 +16,19 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
 - Azure NSG (Network Security Groups)
 - Azure User & System Managed Identities
 - Azure SQL Managed Instance
+
+## How To
+
+All these CLI commands require us to login into azure `az login` and set the right subscription `az account set --subscription SUB_ID`. We could use the CLI commands individually as required or in order. For instance:
+
+- [Follow CLI instructions in order][103]
+- [ONLY Create a Private Azure Container Registry (ACR)][104]
+- [ONLY Create a Public Azure Container Registry (ACR)][105]
+- [ONLY Create a Private Azure Kubernetes Service (AKS) with Kubenet][106]
+- [ONLY AKS to ACR Integration][107]
+- [ONLY Create AzureDevOps agents][108]
+- [ONLY Create a Bastion agent][109]
+- [ONLY Create and Setup an Azure SQL Managed Identity][110]
 
 ## Useful Commands
 
@@ -271,7 +284,9 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --ipv4-address $DATA_ENDPOINT_PRIVATE_IP
    ```
 
-6. ### Create a public Azure Container Registry (ACR)
+6. ### Create a Public Azure Container Registry (ACR)
+
+   1. [Create a Resource Group][102]
 
    ```bash
    # [OPTIONALLY] Create a public ACR
@@ -284,7 +299,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --tags $tags
    ```
 
-7. ### Create a private Azure Kubernetes Service (AKS) with Kubenet
+7. ### Create a Private Azure Kubernetes Service (AKS) with Kubenet
 
    1. [Create a Resource Group][102]
    1. [Create a vNet][100]
@@ -376,7 +391,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --attach-acr $ACR_ID
    ```
 
-9. ### Create an AzureDevOps agent
+9. ### Create AzureDevOps agents
 
    1. [Create a Resource Group][102]
    1. [Create a vNet][100]
@@ -808,3 +823,11 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
 [100]: #create-main-vnet
 [101]: #setup-private-link-subnet
 [102]: #create-main-resource-group
+[103]: #connect-to-our-azure-subscription
+[104]: #create-a-private-azure-container-registry-acr
+[105]: #create-a-public-azure-container-registry-acr
+[106]: #create-a-private-azure-kubernetes-service-aks-with-kubenet
+[107]: #aks-to-acr-integration
+[108]: #create-azuredevops-agents
+[109]: #create-a-bastion-agent
+[110]: #create-and-setup-an-azure-sql-managed-identity
