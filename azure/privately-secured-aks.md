@@ -79,9 +79,6 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    #Bastion
    snet_n_bas="AzureBastionSubnet";       echo $snet_n_bas
    snet_addr_bas="$vnet_pre.1.0/27";      echo $snet_addr_bas
-   #Az DevOps Agents
-   snet_n_devops="snet-$app-$env-devops"; echo $snet_n_devops
-   snet_addr_devops="$vnet_pre.2.0/24";   echo $snet_addr_devops
    #Private Endpoints
    snet_n_pe="snet-$app-$env-pe";         echo $snet_n_pe
    snet_addr_pe="$vnet_pre.3.0/24";       echo $snet_addr_pe
@@ -119,8 +116,11 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    # ---
    # DevOps Agents (scale set recommended though)
    # ---
-   devops_vm_n="vm-$app-$env-devops";            echo $devops_vm_n
-   devops_vm_img="UbuntuLTS";                    echo $devops_vm_img
+   devops_vm_n="vm-$app-$env-devops";           echo $devops_vm_n
+   devops_vm_img="UbuntuLTS";                   echo $devops_vm_img
+   snet_n_devops="snet-$app-$env-devops";       echo $snet_n_devops
+   snet_addr_devops="$vnet_pre.2.0/24";         echo $snet_addr_devops
+   nsg_n_devops="nsg-$app-$env-devops";         echo $nsg_n_devops
 
    # ---
    # SQLMI
@@ -277,14 +277,6 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --name $snet_n_bas \
    --address-prefixes $snet_addr_bas \
    --network-security-group $nsg_n_bastion
-
-   # DevOps Subnet
-   az network vnet subnet create \
-   --resource-group $app_rg \
-   --vnet-name $vnet_n \
-   --name $snet_n_devops \
-   --address-prefixes $snet_addr_devops \
-   --network-security-group $nsg_n_default
 
    # default SQLMI NSG
    az network nsg create \
@@ -535,7 +527,25 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
 
 10. ### Create an AzureDevOps agent
 
+    1. [Create a Resource Group][102]
+    1. [Create a vNet][100]
+
     ```bash
+    # DevOps NSG with Default rules
+    az network nsg create \
+    --resource-group $app_rg \
+    --name $nsg_n_devops \
+    --location $l \
+    --tags $tags
+
+    # DevOps Subnet
+    az network vnet subnet create \
+    --resource-group $app_rg \
+    --vnet-name $vnet_n \
+    --name $snet_n_devops \
+    --address-prefixes $snet_addr_devops \
+    --network-security-group $nsg_n_devops
+
     # test vm that could also be used as DevOps Agent (scale sets recommend though)
     az vm create \
     --resource-group $app_rg \
@@ -751,7 +761,7 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
 - [MS | Docs | Create a user-assigned managed identity][26]
 - Azure DevOps
 - [MS | Docs | Azure virtual machine scale set agents][2]
-- [MS | Docs | Azure virtual machine scale set agents][17]
+- [MS | Docs | Service connections][17]
 - [MS | Docs | Get started with Azure DevOps CLI][18]
 - Azure VM Scale Sets
 - [MS | Docs | Configure managed identities for Azure resources on a virtual machine scale set using Azure CLI][19]
