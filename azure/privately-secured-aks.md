@@ -162,22 +162,6 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
    --name $nsg_n_default \
    --location $l \
    --tags $tags
-
-   # default SQLMI NSG
-   az network nsg create \
-   --name $nsg_n_sqlmi \
-   --resource-group $app_rg \
-   --location $l \
-   --tags $tags
-
-   # Create SQLMI Subnet
-   az network vnet subnet create \
-   --resource-group $app_rg \
-   --vnet-name $vnet_n \
-   --name $snet_n_sqlmi \
-   --address-prefixes $snet_addr_sqlmi \
-   --network-security-group $nsg_n_sqlmi \
-   --delegations Microsoft.Sql/managedInstances
    ```
 
 5. ### Setup Private Link Subnet
@@ -686,9 +670,27 @@ Connect privately to Azure Kubernetes Services and Azure Container Registry usin
 
 13. ### Create and Setup an Azure SQL Managed Identity
 
-    [Review Network Requirements][29]
+    1. [Review Network Requirements][29]
+    1. [Create a Resource Group][102]
+    1. [Create a vNet][100]
 
     ```bash
+    # default SQLMI NSG
+    az network nsg create \
+    --name $nsg_n_sqlmi \
+    --resource-group $app_rg \
+    --location $l \
+    --tags $tags
+
+    # Create SQLMI Subnet
+    az network vnet subnet create \
+    --resource-group $app_rg \
+    --vnet-name $vnet_n \
+    --name $snet_n_sqlmi \
+    --address-prefixes $snet_addr_sqlmi \
+    --network-security-group $nsg_n_sqlmi \
+    --delegations Microsoft.Sql/managedInstances
+
     # Create an SQLMI custom Route Table
     az network route-table create \
     --name $sqlmi_rt_n \
