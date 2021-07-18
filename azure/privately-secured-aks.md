@@ -67,7 +67,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
    # Main Vars
    # ---
    app="confidential";                          echo $app
-   env="dev";                                  echo $env
+   env="prod";                                  echo $env
    l="eastus2";                                 echo $l
    tags="env=$env app=$app";                    echo $tags
    user_n_test="artiomlk";                      echo $user_n_test
