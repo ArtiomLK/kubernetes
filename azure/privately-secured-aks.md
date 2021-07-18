@@ -25,6 +25,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
 - [ONLY Create a Private Azure Container Registry (ACR)][104]
 - [ONLY Create a Public Azure Container Registry (ACR)][105]
 - [ONLY Create a Private Azure Kubernetes Service (AKS) with Kubenet][106]
+- [ONLY Create a Private Azure Kubernetes Service (AKS) with Azure Container Networking Interface (CNI)][111]
 - [ONLY AKS to ACR Integration][107]
 - [ONLY Create AzureDevOps agents][108]
 - [ONLY Create a Bastion agent][109]
@@ -106,6 +107,15 @@ All these CLI commands require us to login into azure `az login` and set the rig
    aks_v="1.20.7";                              echo $aks_v
    aks_node_size="Standard_B2s";                echo $aks_node_size
    aks_id_n="id-$app-$env";                     echo $aks_id_n
+   # AKS CNI Network Plugin
+   snet_n_aks_cni="snet-$app-aks-cni-$env";     echo $snet_n_aks_cni
+   snet_addr_aks_cni="$vnet_pre.16.0/21";       echo $snet_addr_aks_cni
+   aks_cluster_n_cni="aks-$app-cni-$env";       echo $aks_cluster_n_cni
+   aks_cluster_count_cni="3";                   echo $aks_cluster_count_cni
+   aks_node_max_pod_cni="110";                  echo $aks_node_max_pod_cni
+   aks_v_cni="1.20.7";                          echo $aks_v_cni
+   aks_node_size_cni="Standard_B2s";            echo $aks_node_size_cni
+   aks_id_n_cni="id-$app-aks-cni-$env";         echo $aks_id_n_cni
 
    # ---
    # Bastion
@@ -377,7 +387,70 @@ All these CLI commands require us to login into azure `az login` and set the rig
 
    _If you don't have a network watcher enabled in the region that the virtual network you want to generate a topology for is in, network watchers are automatically created for you in all regions. The network watchers are created in a resource group named NetworkWatcherRG._
 
-8. ### AKS to ACR Integration
+8. ### Create a Public Azure Kubernetes Service (AKS) with Azure Container Networking Interface (CNI)
+
+   1. [Review the Azure CNI Requirements][38]
+   1. [Review Maximum pods per node][39]
+   1. [Create a Resource Group][102]
+   1. [Create a vNet][100]
+   1. Calculate Subnet size
+      - (number of nodes + 1) + ((number of nodes + 1) \* maximum pods per node that you configure)
+        - 50 Nodes Scaling to 60 Nodes (30 max pods per Node)
+          - (51) + (51 \* 30) = 1,581 < (2,043 + 5 az) = /21 or larger
+          - (61) + (61 \* 30) = 1,891 < (2,043 + 5 az) = /21 or larger
+        - 10 Nodes scaling to 17 Nodes (110 max pods per Node)
+          - (11) + (11 \* 110) = 1,221 < (2,043 + 5 az) = /21 or larger
+          - (18) + (18 \* 110) = 1,998 < (2,043 + 5 az) = /21 or larger
+
+   ```bash
+   # AKS Subnet
+   az network vnet subnet create \
+   --resource-group $app_rg \
+   --vnet-name $vnet_n \
+   --name $snet_n_aks_cni \
+   --address-prefixes $snet_addr_aks_cni
+
+   # Create an User Managed Identity
+   az identity create \
+   -g $app_rg \
+   -n $aks_id_n_cni \
+   --tags $tags
+
+   # Assign permissions to the User Managed Identity Network Contributor Role to modify vnet as required
+   AKS_CNI_MANAGEDID_SP_ID=$(az identity show --resource-group $app_rg --name $aks_id_n_cni --query principalId --out tsv); echo $AKS_CNI_MANAGEDID_SP_ID
+   VNET_ID=$(az network vnet show --resource-group $app_rg --name $vnet_n --query id -o tsv) ; echo $VNET_ID
+   az role assignment create --assignee $AKS_CNI_MANAGEDID_SP_ID --scope $VNET_ID --role "Network Contributor"
+
+   # Provide sNet to allocate AKS nodes
+   SNET_AKS_CNI_ID=$(az network vnet subnet show --resource-group $app_rg --vnet-name $vnet_n --name $snet_n_aks_cni --query id -o tsv); echo $SNET_AKS_CNI_ID
+   # Attach User Managed Identity by ID to our AKS
+   AKS_CNI_MANAGEDID_ID=$(az identity show --resource-group $app_rg --name $aks_id_n_cni --query id --out tsv); echo $AKS_CNI_MANAGEDID_ID
+
+   # OPTIONALLY - Attach ACR by ID to our AKS
+   # ACR_ID=$(az acr show --name $acr_n --query 'id' --output tsv);   echo $ACR_ID
+   # --attach-acr $ACR_ID \
+
+   # Create the AKS with any of the following command
+   az aks create \
+   --name $aks_cluster_n_cni \
+   --resource-group $app_rg \
+   --kubernetes-version $aks_v_cni \
+   --node-vm-size $aks_node_size_cni \
+   --network-plugin azure \
+   --service-cidr 10.2.0.0/24 \
+   --dns-service-ip 10.2.0.10 \
+   --docker-bridge-address 172.17.0.1/16 \
+   --vnet-subnet-id $SNET_AKS_CNI_ID \
+   --vm-set-type VirtualMachineScaleSets \
+   --node-count $aks_cluster_count_cni \
+   --max-pod $aks_node_max_pod_cni \
+   --generate-ssh-keys \
+   --enable-managed-identity \
+   --assign-identity $AKS_CNI_MANAGEDID_ID \
+   --tags $tags
+   ```
+
+9. ### AKS to ACR Integration
 
    ```bash
    # Integrate the ACR with an existing AKS (this creates a system managed identity)
@@ -391,93 +464,93 @@ All these CLI commands require us to login into azure `az login` and set the rig
    --attach-acr $ACR_ID
    ```
 
-9. ### Create AzureDevOps agents
+10. ### Create AzureDevOps agents
 
-   1. [Create a Resource Group][102]
-   1. [Create a vNet][100]
+    1. [Create a Resource Group][102]
+    1. [Create a vNet][100]
 
-   ```bash
-   # DevOps NSG with Default rules
-   az network nsg create \
-   --resource-group $app_rg \
-   --name $nsg_n_devops \
-   --location $l \
-   --tags $tags
+    ```bash
+    # DevOps NSG with Default rules
+    az network nsg create \
+    --resource-group $app_rg \
+    --name $nsg_n_devops \
+    --location $l \
+    --tags $tags
 
-   # DevOps Subnet
-   az network vnet subnet create \
-   --resource-group $app_rg \
-   --vnet-name $vnet_n \
-   --name $snet_n_devops \
-   --address-prefixes $snet_addr_devops \
-   --network-security-group $nsg_n_devops
+    # DevOps Subnet
+    az network vnet subnet create \
+    --resource-group $app_rg \
+    --vnet-name $vnet_n \
+    --name $snet_n_devops \
+    --address-prefixes $snet_addr_devops \
+    --network-security-group $nsg_n_devops
 
-   # test vm that could also be used as DevOps Agent (scale sets recommend though)
-   az vm create \
-   --resource-group $app_rg \
-   --name $devops_vm_n \
-   --vnet-name $vnet_n \
-   --subnet $snet_n_devops \
-   --image $devops_vm_img \
-   --admin-username $user_n_test \
-   --generate-ssh-keys \
-   --public-ip-address "" \
-   --nsg "" \
-   --nsg-rule NONE \
-   --tags $tags
+    # test vm that could also be used as DevOps Agent (scale sets recommend though)
+    az vm create \
+    --resource-group $app_rg \
+    --name $devops_vm_n \
+    --vnet-name $vnet_n \
+    --subnet $snet_n_devops \
+    --image $devops_vm_img \
+    --admin-username $user_n_test \
+    --generate-ssh-keys \
+    --public-ip-address "" \
+    --nsg "" \
+    --nsg-rule NONE \
+    --tags $tags
 
-   # vm scale set agents
-   az vmss create \
-   --name $devops_vm_n \
-   --resource-group $app_rg \
-   --image $devops_vm_img \
-   --vm-sku Standard_D2_v3 \
-   --storage-sku StandardSSD_LRS \
-   --authentication-type SSH \
-   --vnet-name $vnet_n \
-   --subnet $snet_n_devops \
-   --instance-count 2 \
-   --disable-overprovision \
-   --upgrade-policy-mode manual \
-   --single-placement-group false \
-   --platform-fault-domain-count 1 \
-   --load-balancer "" \
-   --assign-identity \
-   --admin-username $user_n_test \
-   --tags $tags
+    # vm scale set agents
+    az vmss create \
+    --name $devops_vm_n \
+    --resource-group $app_rg \
+    --image $devops_vm_img \
+    --vm-sku Standard_D2_v3 \
+    --storage-sku StandardSSD_LRS \
+    --authentication-type SSH \
+    --vnet-name $vnet_n \
+    --subnet $snet_n_devops \
+    --instance-count 2 \
+    --disable-overprovision \
+    --upgrade-policy-mode manual \
+    --single-placement-group false \
+    --platform-fault-domain-count 1 \
+    --load-balancer "" \
+    --assign-identity \
+    --admin-username $user_n_test \
+    --tags $tags
 
-   # EXPECTED RESULT {"clientId": "msi"}
-   az aks show -g $app_rg -n $aks_cluster_n --query "servicePrincipalProfile"
-   # ----
-   # IF not msi result enable AKS managed identity
-   # ---
-   # az aks update -g $app_rg -n $aks_cluster_n --enable-managed-identity
-   # ----
-   # To complete the update to managed identity upgrade the nodepools. e.g.
-   # ----
-   # az aks nodepool upgrade --node-image-only -g $app_rg --cluster-name $aks_cluster_n -n nodepool1
-
-
-   # Configure the VMSS with a system-managed identity to grant access to the container registry
-   SP_VMSS_ID=$(az vmss show --resource-group $app_rg --name $devops_vm_n --query identity.principalId --out tsv); echo $SP_VMSS_ID
-
-   # Grant the AzDevOps VMSS system managed identity access to the ACR
-   ACR_ID=$(az acr show --name $acr_n --query 'id' --output tsv);   echo $ACR_ID
-   az role assignment create --assignee $SP_VMSS_ID --scope $ACR_ID --role acrpush
+    # EXPECTED RESULT {"clientId": "msi"}
+    az aks show -g $app_rg -n $aks_cluster_n --query "servicePrincipalProfile"
+    # ----
+    # IF not msi result enable AKS managed identity
+    # ---
+    # az aks update -g $app_rg -n $aks_cluster_n --enable-managed-identity
+    # ----
+    # To complete the update to managed identity upgrade the nodepools. e.g.
+    # ----
+    # az aks nodepool upgrade --node-image-only -g $app_rg --cluster-name $aks_cluster_n -n nodepool1
 
 
-   # Grant the AzDevOps VMSS system managed identity access to the AKS
-   AKS_ID=$(az aks show --name $aks_cluster_n -g $app_rg --query 'id' --output tsv);   echo $AKS_ID
-   az role assignment create --assignee $SP_VMSS_ID --scope $AKS_ID --role Contributor
+    # Configure the VMSS with a system-managed identity to grant access to the container registry
+    SP_VMSS_ID=$(az vmss show --resource-group $app_rg --name $devops_vm_n --query identity.principalId --out tsv); echo $SP_VMSS_ID
 
-   # Validate both ACR and AKS roles
-   az role assignment list --assignee $SP_VMSS_ID --scope $ACR_ID
-   az role assignment list --assignee $SP_VMSS_ID --scope $AKS_ID
+    # Grant the AzDevOps VMSS system managed identity access to the ACR
+    ACR_ID=$(az acr show --name $acr_n --query 'id' --output tsv);   echo $ACR_ID
+    az role assignment create --assignee $SP_VMSS_ID --scope $ACR_ID --role acrpush
 
-   # You can't RDP from outside the vnet to the vm because it ONLY has a private IP and the NSG associated does not allow RDP by default, we overcome this with a Bastion :)
-   ```
 
-10. ### Create a Bastion agent
+    # Grant the AzDevOps VMSS system managed identity access to the AKS
+    AKS_ID=$(az aks show --name $aks_cluster_n -g $app_rg --query 'id' --output tsv);   echo $AKS_ID
+    az role assignment create --assignee $SP_VMSS_ID --scope $AKS_ID --role Contributor
+
+    # Validate both ACR and AKS roles
+    az role assignment list --assignee $SP_VMSS_ID --scope $ACR_ID
+    az role assignment list --assignee $SP_VMSS_ID --scope $AKS_ID
+
+    # You can't RDP from outside the vnet to the vm because it ONLY has a private IP and the NSG associated does not allow RDP by default, we overcome this with a Bastion :)
+    ```
+
+11. ### Create a Bastion agent
 
     1. [Create a Resource Group][102]
     1. [Create a vNet][100]
@@ -613,7 +686,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
     --location $l
     ```
 
-11. ### Test Private Endpoint DNS Resolution
+12. ### Test Private Endpoint DNS Resolution
 
     ```bash
     # ssh azureuser@publicIpAddress
@@ -672,7 +745,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
     kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/kubernetes/main/definitionFiles/service/loadBalancer/svc-nginx-to-deploy.yaml
     ```
 
-12. ### Create and Setup an Azure SQL Managed Identity
+13. ### Create and Setup an Azure SQL Managed Identity
 
     1. [Review Network Requirements][29]
     1. [Create a Resource Group][102]
@@ -733,7 +806,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
     --tags $tags
     ```
 
-13. ### Cleanup resources
+14. ### Cleanup resources
 
     ```bash
     az group delete -n $app_rg -y --no-wait
@@ -757,6 +830,11 @@ All these CLI commands require us to login into azure `az login` and set the rig
 - [MS | Docs | Network concepts for applications in Azure Kubernetes Service (AKS)][23]
 - [MS | Docs | Use kubenet networking with your own IP address ranges in Azure Kubernetes Service (AKS)][24]
 - [MS | Docs | Best practices for cluster isolation in Azure Kubernetes Service (AKS)][34]
+- [MS | Docs | Configure Azure CNI networking in Azure Kubernetes Service (AKS)][35]
+- [MS | Docs | Configure Azure CNI networking in Azure Kubernetes Service (AKS) - Prerequisites][38]
+- [MS | Docs | Maximum pods per node][39]
+- [Understanding kubernetes networking: pods][36]
+- [Medium | AKS: Kubenet vs Azure CNI][37]
 - DNS
 - [MS | Docs | What is Azure Private DNS?][25]
 - [MS | Docs | What is the auto registration feature in Azure DNS private zones?][8]
@@ -822,6 +900,11 @@ All these CLI commands require us to login into azure `az login` and set the rig
 [32]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/connection-types-overview
 [33]: https://docs.microsoft.com/en-us/azure/azure-sql/managed-instance/connect-vm-instance-configure
 [34]: https://docs.microsoft.com/en-us/azure/aks/operator-best-practices-cluster-isolation
+[35]: https://docs.microsoft.com/en-us/azure/aks/configure-azure-cni
+[36]: https://waterplacid.files.wordpress.com/2018/04/understanding-kubernetes-networking.pdf
+[37]: https://mehighlow.medium.com/aks-kubenet-vs-azure-cni-363298dd53bf
+[38]: https://docs.microsoft.com/en-us/azure/aks/configure-azure-cni#prerequisites
+[39]: https://docs.microsoft.com/en-us/azure/aks/configure-azure-cni#maximum-pods-per-node
 [100]: #create-main-vnet
 [101]: #setup-private-link-subnet
 [102]: #create-main-resource-group
@@ -833,3 +916,4 @@ All these CLI commands require us to login into azure `az login` and set the rig
 [108]: #create-azuredevops-agents
 [109]: #create-a-bastion-agent
 [110]: #create-and-setup-an-azure-sql-managed-identity
+[111]: #create-a-public-azure-kubernetes-service-aks-with-azure-container-networking-interface-cni
