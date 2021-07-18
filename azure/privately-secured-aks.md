@@ -67,7 +67,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
    # Main Vars
    # ---
    app="confidential";                          echo $app
-   env="prod";                                  echo $env
+   env="dev";                                  echo $env
    l="eastus2";                                 echo $l
    tags="env=$env app=$app";                    echo $tags
    user_n_test="artiomlk";                      echo $user_n_test
@@ -906,6 +906,9 @@ All these CLI commands require us to login into azure `az login` and set the rig
 - AGIC
 - [MS | Docs | What is Application Gateway Ingress Controller?][40]
 - [MS | Docs | Application Gateway infrastructure configuration][41]
+- [MS | Docs | Quickstart: Direct web traffic with Azure Application Gateway - Azure CLI][42]
+- [MS | Docs | Enable the Ingress Controller add-on for a new AKS cluster with a new Application Gateway instance][43]
+- [MS | Docs | Enable Application Gateway Ingress Controller add-on for an existing AKS cluster with an existing Application Gateway][44]
 - DNS
 - [MS | Docs | What is Azure Private DNS?][25]
 - [MS | Docs | What is the auto registration feature in Azure DNS private zones?][8]
@@ -978,6 +981,9 @@ All these CLI commands require us to login into azure `az login` and set the rig
 [39]: https://docs.microsoft.com/en-us/azure/aks/configure-azure-cni#maximum-pods-per-node
 [40]: https://docs.microsoft.com/en-us/azure/application-gateway/ingress-controller-overview
 [41]: https://docs.microsoft.com/en-us/azure/application-gateway/configuration-infrastructure
+[42]: https://docs.microsoft.com/en-us/azure/application-gateway/quick-create-cli
+[43]: https://docs.microsoft.com/en-us/azure/application-gateway/tutorial-ingress-controller-add-on-new
+[44]: https://docs.microsoft.com/en-us/azure/application-gateway/tutorial-ingress-controller-add-on-existing
 [100]: #create-main-vnet
 [101]: #setup-private-link-subnet
 [102]: #create-main-resource-group
