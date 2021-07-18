@@ -25,7 +25,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
 - [ONLY Create a Private Azure Container Registry (ACR)][104]
 - [ONLY Create a Public Azure Container Registry (ACR)][105]
 - [ONLY Create a Private Azure Kubernetes Service (AKS) with Kubenet][106]
-- [ONLY Create a Private Azure Kubernetes Service (AKS) with Azure Container Networking Interface (CNI)][111]
+- [ONLY Create a Public Azure Kubernetes Service (AKS) with Azure Container Networking Interface (CNI)][111]
 - [ONLY AKS to ACR Integration][107]
 - [ONLY Create AzureDevOps agents][108]
 - [ONLY Create a Bastion agent][109]
@@ -449,6 +449,8 @@ All these CLI commands require us to login into azure `az login` and set the rig
    --assign-identity $AKS_CNI_MANAGEDID_ID \
    --tags $tags
    ```
+
+   _If you don't have a network watcher enabled in the region that the virtual network you want to generate a topology for is in, network watchers are automatically created for you in all regions. The network watchers are created in a resource group named NetworkWatcherRG._
 
 9. ### AKS to ACR Integration
 
