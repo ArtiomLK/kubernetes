@@ -26,6 +26,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
 - [ONLY Create a Public Azure Container Registry (ACR)][105]
 - [ONLY Create a Private Azure Kubernetes Service (AKS) with Kubenet][106]
 - [ONLY Create a Public Azure Kubernetes Service (AKS) with Azure Container Networking Interface (CNI)][111]
+- [ONLY Enable AGIC on a Public AKS with Azure (CNI)][112]
 - [ONLY AKS to ACR Integration][107]
 - [ONLY Create AzureDevOps agents][108]
 - [ONLY Create a Bastion agent][109]
@@ -116,6 +117,16 @@ All these CLI commands require us to login into azure `az login` and set the rig
    aks_v_cni="1.20.7";                          echo $aks_v_cni
    aks_node_size_cni="Standard_B2s";            echo $aks_node_size_cni
    aks_id_n_cni="id-$app-aks-cni-$env";         echo $aks_id_n_cni
+
+   # ---
+   # AGIC
+   # ---
+   agic_n="agic-$app-$env";                     echo $agic_n
+   agic_sku="Standard_v2";                      echo $agic_sku
+   agic_pip_n="agic-$app-$env";                 echo $agic_pip_n
+   agic_pip_sku="Standard";                     echo $agic_pip_sku
+   agic_snet_n="snet-agic-$app-$env";           echo $agic_snet_n
+   agic_snet_addr="$vnet_pre.24.0/21";          echo $agic_snet_addr
 
    # ---
    # Bastion
@@ -452,21 +463,76 @@ All these CLI commands require us to login into azure `az login` and set the rig
 
    _If you don't have a network watcher enabled in the region that the virtual network you want to generate a topology for is in, network watchers are automatically created for you in all regions. The network watchers are created in a resource group named NetworkWatcherRG._
 
-9. ### AKS to ACR Integration
+9. ### Create a new Application Gateway
+
+   1. [Create a Resource Group][102]
+   1. [Create a vNet][100]
 
    ```bash
-   # Integrate the ACR with an existing AKS (this creates a system managed identity)
-   # it authorizes the ACR in your subscription and configures the appropriate ACRPull role for the managed identity.
-   # get ACR ID
-   ACR_ID=$(az acr show --name ${acr_n} --query 'id' --output tsv); echo $ACR_ID
-   # Attach ACR to AKS
-   az aks update \
-   -n $aks_cluster_n \
+   #AGIC PIP
+   az network public-ip create \
+   -n $agic_pip_n \
    -g $app_rg \
-   --attach-acr $ACR_ID
+   --allocation-method Static \
+   --zone 1 2 3 \
+   --sku $agic_pip_sku \
+   --tags $tags
+
+   # AGIC Subnet
+   az network vnet subnet create \
+   --resource-group $app_rg \
+   --vnet-name $vnet_n \
+   --name $agic_snet_n \
+   --address-prefixes $agic_snet_addr
+
+   # APP Gateway
+   az network application-gateway create \
+   -n $agic_n \
+   -l $l \
+   -g $app_rg \
+   --sku $agic_sku \
+   --public-ip-address $agic_pip_n \
+   --vnet-name $vnet_n \
+   --subnet $agic_snet_n \
+   --tags $tags
    ```
 
-10. ### Create AzureDevOps agents
+10. ### Enable the AGIC add-on in existing AKS cluster
+
+    1. [If you're using kubenet with Azure Kubernetes Service (AKS) and Application Gateway Ingress Controller (AGIC), you'll need a route table to allow traffic sent to the pods from Application Gateway to be routed to the correct node. This won't be necessary if you use Azure CNI.][41]
+    1. [Create a Public Azure Kubernetes Service (AKS) with Azure Container Networking Interface (CNI)][111]
+    1. [Create a new Application Gateway][113]
+
+    ```bash
+    # GET APP Gateway RESOURCE ID
+    AGIC_APPGW_ID=$(az network application-gateway show -n $agic_n  -g $app_rg -o tsv --query "id"); echo $AGIC_APPGW_ID
+    # Enable AGIC on existing cluster
+    az aks enable-addons -n $aks_cluster_n_cni -g $app_rg -a ingress-appgw --appgw-id $AGIC_APPGW_ID
+    ```
+
+    ```bash
+    # Test AGIC
+    echo $aks_cluster_n_cni
+    echo $app_rg
+    az aks get-credentials -n $aks_cluster_n_cni -g $app_rg
+    kubectl apply -f https://raw.githubusercontent.com/Azure/application-gateway-kubernetes-ingress/master/docs/examples/aspnetapp.yaml
+    ```
+
+11. ### AKS to ACR Integration
+
+    ```bash
+    # Integrate the ACR with an existing AKS (this creates a system managed identity)
+    # it authorizes the ACR in your subscription and configures the appropriate ACRPull role for the managed identity.
+    # get ACR ID
+    ACR_ID=$(az acr show --name ${acr_n} --query 'id' --output tsv); echo $ACR_ID
+    # Attach ACR to AKS
+    az aks update \
+    -n $aks_cluster_n \
+    -g $app_rg \
+    --attach-acr $ACR_ID
+    ```
+
+12. ### Create AzureDevOps agents
 
     1. [Create a Resource Group][102]
     1. [Create a vNet][100]
@@ -552,7 +618,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
     # You can't RDP from outside the vnet to the vm because it ONLY has a private IP and the NSG associated does not allow RDP by default, we overcome this with a Bastion :)
     ```
 
-11. ### Create a Bastion agent
+13. ### Create a Bastion agent
 
     1. [Create a Resource Group][102]
     1. [Create a vNet][100]
@@ -688,7 +754,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
     --location $l
     ```
 
-12. ### Test Private Endpoint DNS Resolution
+14. ### Test Private Endpoint DNS Resolution
 
     ```bash
     # ssh azureuser@publicIpAddress
@@ -747,7 +813,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
     kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/kubernetes/main/definitionFiles/service/loadBalancer/svc-nginx-to-deploy.yaml
     ```
 
-13. ### Create and Setup an Azure SQL Managed Identity
+15. ### Create and Setup an Azure SQL Managed Identity
 
     1. [Review Network Requirements][29]
     1. [Create a Resource Group][102]
@@ -808,7 +874,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
     --tags $tags
     ```
 
-14. ### Cleanup resources
+16. ### Cleanup resources
 
     ```bash
     az group delete -n $app_rg -y --no-wait
@@ -837,6 +903,9 @@ All these CLI commands require us to login into azure `az login` and set the rig
 - [MS | Docs | Maximum pods per node][39]
 - [Understanding kubernetes networking: pods][36]
 - [Medium | AKS: Kubenet vs Azure CNI][37]
+- AGIC
+- [MS | Docs | What is Application Gateway Ingress Controller?][40]
+- [MS | Docs | Application Gateway infrastructure configuration][41]
 - DNS
 - [MS | Docs | What is Azure Private DNS?][25]
 - [MS | Docs | What is the auto registration feature in Azure DNS private zones?][8]
@@ -907,6 +976,8 @@ All these CLI commands require us to login into azure `az login` and set the rig
 [37]: https://mehighlow.medium.com/aks-kubenet-vs-azure-cni-363298dd53bf
 [38]: https://docs.microsoft.com/en-us/azure/aks/configure-azure-cni#prerequisites
 [39]: https://docs.microsoft.com/en-us/azure/aks/configure-azure-cni#maximum-pods-per-node
+[40]: https://docs.microsoft.com/en-us/azure/application-gateway/ingress-controller-overview
+[41]: https://docs.microsoft.com/en-us/azure/application-gateway/configuration-infrastructure
 [100]: #create-main-vnet
 [101]: #setup-private-link-subnet
 [102]: #create-main-resource-group
@@ -919,3 +990,5 @@ All these CLI commands require us to login into azure `az login` and set the rig
 [109]: #create-a-bastion-agent
 [110]: #create-and-setup-an-azure-sql-managed-identity
 [111]: #create-a-public-azure-kubernetes-service-aks-with-azure-container-networking-interface-cni
+[112]: #enable-the-agic-add-on-in-existing-aks-cluster
+[113]: #create-a-new-application-gateway
