@@ -16,6 +16,8 @@ Azure Kubernetes Services private cluster architectural design. Connect to an Az
 - Azure NSG (Network Security Groups)
 - Azure User & System Managed Identities
 - Azure SQL Managed Instance
+- Azure App Gateway
+- Azure Front Door
 
 ## How To
 
@@ -27,6 +29,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
 - [ONLY Create a Private Azure Kubernetes Service (AKS) with Kubenet][106]
 - [ONLY Create a Public Azure Kubernetes Service (AKS) with Azure Container Networking Interface (CNI)][111]
 - [ONLY Enable AGIC on a Public AKS with Azure (CNI)][112]
+- [ONLY SetUp Front Door to AGIC on a Public AKS with Azure (CNI)][114]
 - [ONLY AKS to ACR Integration][107]
 - [ONLY Create AzureDevOps agents][108]
 - [ONLY Create a Bastion agent][109]
@@ -67,7 +70,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
    # Main Vars
    # ---
    app="confidential";                          echo $app
-   env="prod";                                  echo $env
+   env="dev";                                  echo $env
    l="eastus2";                                 echo $l
    tags="env=$env app=$app";                    echo $tags
    user_n_test="artiomlk";                      echo $user_n_test
@@ -122,11 +125,17 @@ All these CLI commands require us to login into azure `az login` and set the rig
    # AGIC
    # ---
    agic_n="agic-$app-$env";                     echo $agic_n
-   agic_sku="Standard_v2";                      echo $agic_sku
-   agic_pip_n="agic-$app-$env";                 echo $agic_pip_n
+   agic_sku="WAF_v2";                           echo $agic_sku
+   agic_pip_n="pip-agic-$app-$env";             echo $agic_pip_n
    agic_pip_sku="Standard";                     echo $agic_pip_sku
    agic_snet_n="snet-agic-$app-$env";           echo $agic_snet_n
+   agic_snet_ip="$vnet_pre.24.0";               echo $agic_snet_ip
    agic_snet_addr="$vnet_pre.24.0/21";          echo $agic_snet_addr
+
+   # ---
+   # FD
+   # ---
+   fd_n="fd-$app-$env";                         echo $fd_n
 
    # ---
    # Bastion
@@ -485,16 +494,27 @@ All these CLI commands require us to login into azure `az login` and set the rig
    --name $agic_snet_n \
    --address-prefixes $agic_snet_addr
 
+   # --private-ip-address $AGW_PRIV_IP \
    # APP Gateway
    az network application-gateway create \
    -n $agic_n \
    -l $l \
    -g $app_rg \
    --sku $agic_sku \
+   --zone 1 2 3 \
    --public-ip-address $agic_pip_n \
    --vnet-name $vnet_n \
    --subnet $agic_snet_n \
    --tags $tags
+
+   # Get an Available Private IP from the subnet
+   AGW_PRIV_IP=$(az network vnet check-ip-address -g $app_rg -n $vnet_n --ip-address $agic_snet_ip --query availableIpAddresses[3] --out tsv); echo $AGW_PRIV_IP
+
+   az network application-gateway frontend-ip create \
+   --gateway-name $agic_n \
+   --name appGatewayPrivateFrontendIP \
+   --resource-group $app_rg \
+   --private-ip-address $AGW_PRIV_IP
    ```
 
 10. ### Enable the AGIC add-on in existing AKS cluster
@@ -514,11 +534,41 @@ All these CLI commands require us to login into azure `az login` and set the rig
     # Test AGIC
     echo $aks_cluster_n_cni
     echo $app_rg
-    az aks get-credentials -n $aks_cluster_n_cni -g $app_rg
+    az aks get-credentials -n $aks_cluster_n_cni -g $app_rg --overwrite-existing
     kubectl apply -f https://raw.githubusercontent.com/Azure/application-gateway-kubernetes-ingress/master/docs/examples/aspnetapp.yaml
     ```
 
-11. ### AKS to ACR Integration
+11. ### Create an Azure FrontDoor
+
+    1. [Create a Resource Group][102]
+    1. Check FD name availability
+       - `az network front-door check-name-availability --name $fd_n --resource-type Microsoft.Network/frontDoors`
+
+    ```bash
+    # Get the AGW Frontend Private IP
+    AGW_PRIV_IP=$(az network application-gateway frontend-ip show --gateway-name $agic_n  --resource-group $app_rg -n appGatewayPrivateFrontendIP --query privateIpAddress --out  tsv); echo $AGW_PRIV_IP
+    # OR Find AGW Private IP Manually
+    #az network application-gateway frontend-ip list --gateway-name $agic_n -g $app_rg
+    #az network application-gateway frontend-ip show --gateway-name $agic_n -g $app_rg -n appGatewayPrivateFrontendIP
+    az network front-door create \
+    --backend-address $AGW_PRIV_IP \
+    --name $fd_n \
+    --resource-group $app_rg \
+    --tags $tags
+
+    az network front-door backend-pool list --front-door-name $fd_n \
+                                                --resource-group $app_rg
+
+    az network front-door frontend-endpoint list --front-door-name $fd_n \
+                                             --resource-group $app_rg
+
+    ```
+
+12. ### SetUp FrontDoor to AGIC on a Public AKS with Azure (CNI)
+
+    1. [Enable AGIC on a Public AKS with Azure (CNI)][112]
+
+13. ### AKS to ACR Integration
 
     ```bash
     # Integrate the ACR with an existing AKS (this creates a system managed identity)
@@ -532,7 +582,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
     --attach-acr $ACR_ID
     ```
 
-12. ### Create AzureDevOps agents
+14. ### Create AzureDevOps agents
 
     1. [Create a Resource Group][102]
     1. [Create a vNet][100]
@@ -618,7 +668,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
     # You can't RDP from outside the vnet to the vm because it ONLY has a private IP and the NSG associated does not allow RDP by default, we overcome this with a Bastion :)
     ```
 
-13. ### Create a Bastion agent
+15. ### Create a Bastion agent
 
     1. [Create a Resource Group][102]
     1. [Create a vNet][100]
@@ -754,7 +804,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
     --location $l
     ```
 
-14. ### Test Private Endpoint DNS Resolution
+16. ### Test Private Endpoint DNS Resolution
 
     ```bash
     # ssh azureuser@publicIpAddress
@@ -813,7 +863,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
     kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/kubernetes/main/definitionFiles/service/loadBalancer/svc-nginx-to-deploy.yaml
     ```
 
-15. ### Create and Setup an Azure SQL Managed Identity
+17. ### Create and Setup an Azure SQL Managed Identity
 
     1. [Review Network Requirements][29]
     1. [Create a Resource Group][102]
@@ -874,7 +924,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
     --tags $tags
     ```
 
-16. ### Cleanup resources
+18. ### Cleanup resources
 
     ```bash
     az group delete -n $app_rg -y --no-wait
@@ -909,6 +959,8 @@ All these CLI commands require us to login into azure `az login` and set the rig
 - [MS | Docs | Quickstart: Direct web traffic with Azure Application Gateway - Azure CLI][42]
 - [MS | Docs | Enable the Ingress Controller add-on for a new AKS cluster with a new Application Gateway instance][43]
 - [MS | Docs | Enable Application Gateway Ingress Controller add-on for an existing AKS cluster with an existing Application Gateway][44]
+- FD
+- [MS | Docs | Frequently asked questions for Azure Front Door][45]
 - DNS
 - [MS | Docs | What is Azure Private DNS?][25]
 - [MS | Docs | What is the auto registration feature in Azure DNS private zones?][8]
@@ -984,6 +1036,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
 [42]: https://docs.microsoft.com/en-us/azure/application-gateway/quick-create-cli
 [43]: https://docs.microsoft.com/en-us/azure/application-gateway/tutorial-ingress-controller-add-on-new
 [44]: https://docs.microsoft.com/en-us/azure/application-gateway/tutorial-ingress-controller-add-on-existing
+[45]: https://docs.microsoft.com/en-us/azure/frontdoor/front-door-faq
 [100]: #create-main-vnet
 [101]: #setup-private-link-subnet
 [102]: #create-main-resource-group
@@ -998,3 +1051,4 @@ All these CLI commands require us to login into azure `az login` and set the rig
 [111]: #create-a-public-azure-kubernetes-service-aks-with-azure-container-networking-interface-cni
 [112]: #enable-the-agic-add-on-in-existing-aks-cluster
 [113]: #create-a-new-application-gateway
+[114]: #setup-frontdoor-to-agic-on-a-public-aks-with-azure-cni
