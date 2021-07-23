@@ -514,7 +514,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
    --destination-address-prefixes "*" \
    --access Allow
 
-   # AzureFrontDoor.BackendInbound
+   # AllowAzureFrontDoor.BackendInbound
    az network nsg rule create \
    --name AllowAzureFrontDoor.Backend \
    --direction Inbound \
@@ -527,7 +527,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
    --destination-address-prefixes VirtualNetwork \
    --access Allow
 
-   # AGIC Subnet
+   # Add NSG to AGIC Subnet
    az network vnet subnet update \
    --resource-group $app_rg \
    --vnet-name $vnet_n \
