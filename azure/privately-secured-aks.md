@@ -1035,4 +1035,4 @@ All these CLI commands require us to login into azure `az login` and set the rig
 [111]: #create-a-public-azure-kubernetes-service-aks-with-azure-container-networking-interface-cni
 [112]: #enable-the-agic-add-on-in-existing-aks-cluster
 [113]: #create-a-new-application-gateway
-[114]: #setup-frontdoor-to-agic-on-a-public-aks-with-azure-cni
+[114]: #create-an-azure-frontdoor
