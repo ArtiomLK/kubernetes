@@ -129,6 +129,7 @@ All these CLI commands require us to login into azure `az login` and set the rig
    agic_pip_n="pip-agic-$app-$env";             echo $agic_pip_n
    agic_pip_sku="Standard";                     echo $agic_pip_sku
    agic_snet_n="snet-agic-$app-$env";           echo $agic_snet_n
+   agic_nsg_n="nsg-agic-$app-$env";             echo $agic_nsg_n
    agic_snet_addr="$vnet_pre.24.0/21";          echo $agic_snet_addr
 
    # ---
@@ -486,14 +487,52 @@ All these CLI commands require us to login into azure `az login` and set the rig
    --sku $agic_pip_sku \
    --tags $tags
 
-   #TODO Add NSG with Front Door Rules to restrict traffic
-
    # AGIC Subnet
    az network vnet subnet create \
    --resource-group $app_rg \
    --vnet-name $vnet_n \
    --name $agic_snet_n \
    --address-prefixes $agic_snet_addr
+
+   # AGW NSG with Default rules
+   az network nsg create \
+   --resource-group $app_rg \
+   --name $agic_nsg_n \
+   --location $l \
+   --tags $tags
+
+   # AllowGatewayManagerInbound
+   az network nsg rule create \
+   --name AllowGatewayManagerInbound \
+   --direction Inbound \
+   --resource-group $app_rg \
+   --nsg-name $agic_nsg_n \
+   --priority 300 \
+   --destination-port-ranges 65200-65535 \
+   --protocol TCP \
+   --source-address-prefixes GatewayManager \
+   --destination-address-prefixes "*" \
+   --access Allow
+
+   # AllowAzureFrontDoor.BackendInbound
+   az network nsg rule create \
+   --name AllowAzureFrontDoor.Backend \
+   --direction Inbound \
+   --resource-group $app_rg \
+   --nsg-name $agic_nsg_n \
+   --priority 200 \
+   --destination-port-ranges 443 80 \
+   --protocol TCP \
+   --source-address-prefixes AzureFrontDoor.Backend \
+   --destination-address-prefixes VirtualNetwork \
+   --access Allow
+
+   # Add NSG to AGIC Subnet
+   az network vnet subnet update \
+   --resource-group $app_rg \
+   --vnet-name $vnet_n \
+   --name $agic_snet_n \
+   --network-security-group $agic_nsg_n
 
    # APP Gateway
    az network application-gateway create \
