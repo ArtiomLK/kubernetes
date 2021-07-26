@@ -26,9 +26,9 @@ All these CLI commands require us to login into azure `az login` and point to th
 - [Follow CLI instructions in order][103]
 - [ONLY Create a Private Azure Container Registry (ACR)][104]
 - [ONLY Create a Private Azure Kubernetes Service (AKS) with Kubenet][106]
+- [ONLY AKS to ACR Integration][107]
 - [ONLY Enable AGIC on a Private AKS with kubenet][112]
 - [ONLY SetUp Front Door to AGIC on a Private AKS with Azure (CNI)][114]
-- [ONLY AKS to ACR Integration][107]
 - [ONLY Create AzureDevOps agents][108]
 - [ONLY Create a Bastion agent][109]
 - [ONLY Create and Setup an Azure SQL Managed Identity][110]
@@ -977,13 +977,13 @@ All these CLI commands require us to login into azure `az login` and point to th
 [102]: #create-main-resource-group
 [103]: #connect-to-our-azure-subscription
 [104]: #create-a-private-azure-container-registry-acr
-[105]: #create-a-public-azure-container-registry-acr
+[105]: #empty
 [106]: #create-a-private-azure-kubernetes-service-aks-with-kubenet
 [107]: #aks-to-acr-integration
 [108]: #create-azuredevops-agents
 [109]: #create-a-bastion-agent
 [110]: #create-and-setup-an-azure-sql-managed-identity
-[111]: #create-a-public-azure-kubernetes-service-aks-with-azure-container-networking-interface-cni
-[112]: #enable-the-agic-add-on-an-existing-aks-cluster
+[111]: #empty
+[112]: #enable-the-agic-add-on-on-an-existing-aks-cluster
 [113]: #create-a-new-application-gateway
 [114]: #create-an-azure-frontdoor
