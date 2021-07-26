@@ -26,6 +26,7 @@ All these CLI commands require us to login into azure `az login` and point to th
 - [ONLY Create an Azure Kubernetes Service (AKS) with Azure Container Networking Interface (CNI)][111]
 - [ONLY Enable AGIC on an AKS with Azure (CNI)][112]
 - [ONLY SetUp Front Door to AGIC on an AKS with Azure (CNI)][114]
+- [ONLY Configure Azure Front Door Custom Domains][101]
 - [ONLY AKS to ACR Integration][107]
 - [ONLY Create AzureDevOps agents][108]
 - [ONLY Create a Bastion agent][109]
@@ -115,6 +116,7 @@ All these CLI commands require us to login into azure `az login` and point to th
    # FD
    # ---
    fd_n="$app";                                 echo $fd_n
+   fd_host_n="www.kmgpty.com";                  echo $fd_host_n
 
    # ---
    # Bastion
@@ -173,7 +175,7 @@ All these CLI commands require us to login into azure `az login` and point to th
    1. [Create a Resource Group][102]
 
    ```bash
-   # Create a public ACR
+   # Create an ACR
    az acr create \
    --name "${acr_n}" \
    --resource-group $app_rg \
@@ -381,7 +383,43 @@ All these CLI commands require us to login into azure `az login` and point to th
    --tags $tags
    ```
 
-10. ### Create AzureDevOps agents
+10. ### Configure Azure Front Door Custom Domains
+
+    ```bash
+    # Get FD ID
+    FD_ID=$(az network front-door show --name $fd_n --resource-group $app_rg --query id --out  tsv); echo $FD_ID
+
+    # Check Custom Domain mapping
+    # Add CNAME:
+    # Name e.g. www.kmgpty.com
+    # Value: FDNAME.azurefd.net
+    # TTL 7200 or lowest
+    az network front-door check-custom-domain \
+    --host-name $fd_host_n \
+    --name $fd_n \
+    --resource-group $app_rg
+
+    # Add Custom Domain
+    az network front-door frontend-endpoint create \
+    --front-door-name $fd_n \
+    --host-name $fd_host_n \
+    --name "${app}${env}FrontendEndpoint" \
+    --resource-group $app_rg
+
+    # Enable HTTPs managed by FD, it takes up to ~1hr to complete
+    az network front-door frontend-endpoint enable-https \
+    --front-door-name $fd_n \
+    --name "${app}${env}FrontendEndpoint" \
+    --resource-group $app_rg \
+    --certificate-source FrontDoor \
+    --minimum-tls-version 1.2
+
+    # ---
+    # CONTINUE FROM PORTAL TO ADD BACKEND POOL AND ROUTING RULES
+    # ---
+    ```
+
+11. ### Create AzureDevOps agents
 
     1. [Create a Resource Group][102]
     1. [Create a vNet][100]
@@ -453,7 +491,7 @@ All these CLI commands require us to login into azure `az login` and point to th
     # You can't RDP from outside the vnet to the vm because it ONLY has a private IP and the NSG associated does not allow RDP by default, we overcome this with a Bastion :)
     ```
 
-11. ### Create a Bastion agent
+12. ### Create a Bastion agent
 
     1. [Create a Resource Group][102]
     1. [Create a vNet][100]
@@ -589,7 +627,7 @@ All these CLI commands require us to login into azure `az login` and point to th
     --location $l
     ```
 
-12. ### Testing from vmss
+13. ### Testing from vmss
 
     ```bash
     # ssh azureuser@publicIpAddress
@@ -629,7 +667,7 @@ All these CLI commands require us to login into azure `az login` and point to th
     kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/kubernetes/main/definitionFiles/service/loadBalancer/svc-nginx-to-deploy.yaml
     ```
 
-13. ### Create and Setup an Azure SQL Managed Identity
+14. ### Create and Setup an Azure SQL Managed Identity
 
     1. [Review Network Requirements][29]
     1. [Create a Resource Group][102]
@@ -690,7 +728,7 @@ All these CLI commands require us to login into azure `az login` and point to th
     --tags $tags
     ```
 
-14. ### Cleanup resources
+15. ### Cleanup resources
 
     ```bash
     az group delete -n $app_rg -y --no-wait
@@ -804,7 +842,7 @@ All these CLI commands require us to login into azure `az login` and point to th
 [44]: https://docs.microsoft.com/en-us/azure/application-gateway/tutorial-ingress-controller-add-on-existing
 [45]: https://docs.microsoft.com/en-us/azure/frontdoor/front-door-faq
 [100]: #create-main-vnet
-[101]: #empty
+[101]: #configure-azure-front-door-custom-domains
 [102]: #create-main-resource-group
 [103]: #connect-to-our-azure-subscription
 [104]: #empty
