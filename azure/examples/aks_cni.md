@@ -406,7 +406,7 @@ All these CLI commands require us to login into azure `az login` and point to th
     --name "${app}${env}FrontendEndpoint" \
     --resource-group $app_rg
 
-    # Enable HTTPs managed by FD
+    # Enable HTTPs managed by FD, it takes up to ~1hr to complete
     az network front-door frontend-endpoint enable-https \
     --front-door-name $fd_n \
     --name "${app}${env}FrontendEndpoint" \
