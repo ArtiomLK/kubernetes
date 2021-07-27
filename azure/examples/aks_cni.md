@@ -146,6 +146,7 @@ All these CLI commands require us to login into azure `az login` and point to th
    sqlmi_rt_n="rt-sqlmi-$app-$env";             echo $sqlmi_rt_n
    sqlmi_login="artiomlk";                      echo $sqlmi_login
    sqlmi_pass="Password1234567890!";            echo $sqlmi_pass
+   sqlmi_bu_redundancy="Geo";                   echo $sqlmi_bu_redundancy
    ```
 
 2. ### Create Main Resource Group
@@ -667,7 +668,7 @@ All these CLI commands require us to login into azure `az login` and point to th
     kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/kubernetes/main/definitionFiles/service/loadBalancer/svc-nginx-to-deploy.yaml
     ```
 
-14. ### Create and Setup an Azure SQL Managed Identity
+14. ### Create and Setup an Azure SQL Managed Instance
 
     1. [Review Network Requirements][29]
     1. [Create a Resource Group][102]
@@ -697,9 +698,9 @@ All these CLI commands require us to login into azure `az login` and point to th
     --location $l \
     --tags $tags
 
-    # SQLMI RT Routes
+    # SQLMI RT Routes ToLocalClusterNode
     az network route-table route create \
-    --name "ToLocalClusterNode" \
+    --name "subnet-to-vnetlocal" \
     --address-prefix $snet_addr_sqlmi \
     --next-hop-type VnetLocal \
     --resource-group $app_rg \
@@ -719,6 +720,7 @@ All these CLI commands require us to login into azure `az login` and point to th
     --capacity 4 \
     --minimal-tls-version 1.2 \
     --proxy-override Redirect \
+    --backup-storage-redundancy $sqlmi_bu_redundancy \
     --admin-user $user_n_test \
     --admin-password $sqlmi_pass \
     --resource-group $app_rg \
@@ -788,6 +790,9 @@ All these CLI commands require us to login into azure `az login` and point to th
 - [MS | Docs | Enabling service-aided subnet configuration for Azure SQL Managed Instance][31]
 - [MS | Docs | Azure SQL Managed Instance connection types][32]
 - [MS | Docs | Quickstart: Configure an Azure VM to connect to Azure SQL Managed Instance][33]
+- [MS | Docs | Configuring backup storage redundancy in Azure SQL][46]
+- [MS | Docs | Automated backups - Azure SQL Database & Azure SQL Managed Instance][47]
+- [MS | Docs | Creating and using active geo-replication - Azure SQL Database][48]
 - ACR Private Link
 - [MS | Docs | What is Azure Private Link service?][10]
 - [MS | Docs | Connect privately to an Azure container registry using Azure Private Link][6]
@@ -841,6 +846,9 @@ All these CLI commands require us to login into azure `az login` and point to th
 [43]: https://docs.microsoft.com/en-us/azure/application-gateway/tutorial-ingress-controller-add-on-new
 [44]: https://docs.microsoft.com/en-us/azure/application-gateway/tutorial-ingress-controller-add-on-existing
 [45]: https://docs.microsoft.com/en-us/azure/frontdoor/front-door-faq
+[46]: https://techcommunity.microsoft.com/t5/azure-sql/configuring-backup-storage-redundancy-in-azure-sql/ba-p/1554322
+[47]: https://docs.microsoft.com/en-us/azure/azure-sql/database/automated-backups-overview
+[48]: https://docs.microsoft.com/en-us/azure/azure-sql/database/active-geo-replication-overview
 [100]: #create-main-vnet
 [101]: #configure-azure-front-door-custom-domains
 [102]: #create-main-resource-group
@@ -851,7 +859,7 @@ All these CLI commands require us to login into azure `az login` and point to th
 [107]: #aks-to-acr-integration
 [108]: #create-azuredevops-agents
 [109]: #create-a-bastion-agent
-[110]: #create-and-setup-an-azure-sql-managed-identity
+[110]: #create-and-setup-an-azure-sql-managed-instance
 [111]: #create-an-azure-kubernetes-service-aks-with-azure-container-networking-interface-cni
 [112]: #enable-the-agic-add-on-in-an-existing-aks-cluster
 [113]: #create-a-new-application-gateway
