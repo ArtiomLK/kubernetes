@@ -67,7 +67,7 @@ All these CLI commands require us to login into azure `az login` and point to th
    # Main Vars
    # ---
    app="akscni";                                echo $app
-   env="qa";                                    echo $env
+   env="prod";                                  echo $env
    app_rg="rg-$app-$env";                       echo $app_rg
    l="eastus2";                                 echo $l
    tags="env=$env app=$app";                    echo $tags
