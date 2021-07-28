@@ -147,6 +147,8 @@ All these CLI commands require us to login into azure `az login` and point to th
    sqlmi_login="artiomlk";                      echo $sqlmi_login
    sqlmi_pass="Password1234567890!";            echo $sqlmi_pass
    sqlmi_bu_redundancy="Geo";                   echo $sqlmi_bu_redundancy
+   sqlmi_capacity="24";                         echo $sqlmi_capacity
+   sqlmi_storage="8192";                        echo $sqlmi_storage
    ```
 
 2. ### Create Main Resource Group
@@ -706,6 +708,14 @@ All these CLI commands require us to login into azure `az login` and point to th
     --resource-group $app_rg \
     --route-table-name $sqlmi_rt_n
 
+    # primaryToMIManagementService
+    az network route-table route create \
+    --name "primaryToMIManagementService" \
+    --address-prefix "0.0.0.0/0" \
+    --next-hop-type Internet \
+    --resource-group $app_rg \
+    --route-table-name $sqlmi_rt_n
+
     # Configure SNET with Custom Route Table
     az network vnet subnet update\
     --vnet-name $vnet_n \
@@ -717,7 +727,9 @@ All these CLI commands require us to login into azure `az login` and point to th
     az sql mi create \
     --name $sqlmi_n \
     --public-data-endpoint-enabled false \
-    --capacity 4 \
+    --capacity $sqlmi_capacity \
+    --storage  $sqlmi_storage \
+    --license-type BasePrice \
     --minimal-tls-version 1.2 \
     --proxy-override Redirect \
     --backup-storage-redundancy $sqlmi_bu_redundancy \
@@ -790,9 +802,12 @@ All these CLI commands require us to login into azure `az login` and point to th
 - [MS | Docs | Enabling service-aided subnet configuration for Azure SQL Managed Instance][31]
 - [MS | Docs | Azure SQL Managed Instance connection types][32]
 - [MS | Docs | Quickstart: Configure an Azure VM to connect to Azure SQL Managed Instance][33]
+- Azure SQL managed Instance Backups
 - [MS | Docs | Configuring backup storage redundancy in Azure SQL][46]
 - [MS | Docs | Automated backups - Azure SQL Database & Azure SQL Managed Instance][47]
 - [MS | Docs | Creating and using active geo-replication - Azure SQL Database][48]
+- Azure SQL managed Instance BCDR
+- [MS | Docs | Enabling geo-replication between managed instances and their VNets][49]
 - ACR Private Link
 - [MS | Docs | What is Azure Private Link service?][10]
 - [MS | Docs | Connect privately to an Azure container registry using Azure Private Link][6]
@@ -849,6 +864,7 @@ All these CLI commands require us to login into azure `az login` and point to th
 [46]: https://techcommunity.microsoft.com/t5/azure-sql/configuring-backup-storage-redundancy-in-azure-sql/ba-p/1554322
 [47]: https://docs.microsoft.com/en-us/azure/azure-sql/database/automated-backups-overview
 [48]: https://docs.microsoft.com/en-us/azure/azure-sql/database/active-geo-replication-overview
+[49s]: https://docs.microsoft.com/en-us/azure/azure-sql/database/auto-failover-group-overview?tabs=azure-powershell#enabling-geo-replication-between-managed-instances-and-their-vnets
 [100]: #create-main-vnet
 [101]: #configure-azure-front-door-custom-domains
 [102]: #create-main-resource-group
