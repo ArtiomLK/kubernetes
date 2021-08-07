@@ -15,4 +15,4 @@ These are architecture design examples around Azure Kubernetes Services (AKS)
 
 [1]: ./examples/aks_cni.md
 [2]: ./examples/aks_private_kubenet.md
-[3]: ./examples/snippets/aks_attach_acr.bash
+[3]: ./examples/snippets/aks_attach_acr.md
