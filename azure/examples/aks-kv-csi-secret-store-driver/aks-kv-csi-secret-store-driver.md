@@ -144,13 +144,9 @@ az keyvault purge --name $kv_n --location $l --no-wait
 
 - AKS
 - [MS | Docs | Use the Secrets Store CSI Driver for Kubernetes in an Azure Kubernetes Service (AKS) cluster (preview)][4]
-- [MS | Docs | Best practices for pod security in Azure Kubernetes Service (AKS)][1]
-- [MS | Docs | Use Azure Active Directory pod-managed identities in Azure Kubernetes Service][2]
 - KV
 - [MS | Docs | Set and retrieve a secret from Azure Key Vault using Azure CLI][3]
 
-[1]: https://docs.microsoft.com/en-us/azure/aks/developer-best-practices-pod-security
-[2]: https://docs.microsoft.com/en-us/azure/aks/use-azure-ad-pod-identity
 [3]: https://docs.microsoft.com/en-us/azure/key-vault/secrets/quick-create-cli
 [4]: https://docs.microsoft.com/en-us/azure/aks/csi-secrets-store-driver
 [5]: ./../aks_cni.md#create-an-azure-kubernetes-service-aks-with-azure-container-networking-interface-cni
