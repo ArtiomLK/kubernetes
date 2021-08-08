@@ -3,7 +3,7 @@
 ## Requirements
 
 - Create an AKS Cluster
-  - [You could follow the steps until creating an AKS CNI Cluster][5]
+  - [You could follow these steps to create an AKS CNI Cluster][5]
 
 ## Code
 
