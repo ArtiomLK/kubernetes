@@ -1,4 +1,4 @@
-# AKS Authentication to KV with (CSI) Container Storage Interface Secret Store Driver
+# AKS Authentication to Azure KeyVault with (CSI) Container Storage Interface Secret Store Driver
 
 ## Requirements
 
