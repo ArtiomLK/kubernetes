@@ -153,4 +153,4 @@ az keyvault purge --name $kv_n --location $l --no-wait
 [2]: https://docs.microsoft.com/en-us/azure/aks/use-azure-ad-pod-identity
 [3]: https://docs.microsoft.com/en-us/azure/key-vault/secrets/quick-create-cli
 [4]: https://docs.microsoft.com/en-us/azure/aks/csi-secrets-store-driver
-[5]: ./../aks_cni.md
+[5]: ./../aks_cni.md#create-an-azure-kubernetes-service-aks-with-azure-container-networking-interface-cni
