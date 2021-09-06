@@ -1,8 +1,11 @@
-# Best practices for pod security in Azure Kubernetes Service (AKS)
+# Use Azure Active Directory pod-managed identities in Azure Kubernetes Services
 
 ## Requirements
 
-- Create an AKS Cluster
+- AKS Cluster
+  - You could follow these steps to create an AKS Cluster:
+    - [AKS (Kubenet) Cluster][7]
+    - [AKS (CNI) Cluster][6]
 
 ## Code
 
@@ -230,3 +233,5 @@ az policy assignment delete -n $policy_n -g $app_rg # paste your policy name
 [3]: https://docs.microsoft.com/en-us/azure/key-vault/secrets/quick-create-cli
 [4]: https://docs.microsoft.com/en-us/azure/aks/policy-reference
 [5]: https://docs.microsoft.com/en-us/azure/governance/policy/concepts/policy-for-kubernetes#install-azure-policy-add-on-for-aks
+[6]: ./../aks_cni.md#create-an-azure-kubernetes-service-aks-with-azure-container-networking-interface-cni
+[7]: ./../aks_private_kubenet.md#aks#-#azure#kubernetes#service#zero#trust#environment
