@@ -234,4 +234,4 @@ az policy assignment delete -n $policy_n -g $app_rg # paste your policy name
 [4]: https://docs.microsoft.com/en-us/azure/aks/policy-reference
 [5]: https://docs.microsoft.com/en-us/azure/governance/policy/concepts/policy-for-kubernetes#install-azure-policy-add-on-for-aks
 [6]: ./../aks_cni.md#create-an-azure-kubernetes-service-aks-with-azure-container-networking-interface-cni
-[7]: ./../aks_private_kubenet.md#aks#-#azure#kubernetes#service#zero#trust#environment
+[7]: ./../aks_private_kubenet.md#create-a-private-azure-kubernetes-service-aks-with-kubenet
