@@ -4,10 +4,14 @@
 
 - AKS Cluster
   - You could follow these steps to create an AKS Cluster:
-    - [AKS (Kubenet) Cluster][7]
     - [AKS (CNI) Cluster][6]
+    - [AKS (Kubenet) Cluster][7]
 
 ## Code
+
+---
+
+### Initialize params
 
 ```bash
 # Set Up params if required
@@ -18,7 +22,6 @@ app="confidential";                          echo $app
 env="prod";                                  echo $env
 l="eastus2";                                 echo $l
 tags="env=$env app=$app";                    echo $tags
-
 app_rg="rg-$app-$env";                       echo $app_rg
 
 # ---
@@ -37,9 +40,11 @@ aks_kv_id_n="id-to-kv-$app-$env";            echo $aks_kv_id_n
 # ---
 policy_n="AAD_POD_IDENTITY_MITIGATION_POLICY"; echo $policy_n
 policy_display_n="Kubernetes cluster containers should only use allowed capabilities"; echo $policy_display_n
-policy_id="c26596ff-4d70-4e6a-9a30-c2506bd2f80c"; echo $policy_id
-policy_param="{ \"requiredDropCapabilities\": { \"value\": [ \"NET_RAW\" ] } }"; echo $policy_param
 ```
+
+---
+
+### Create an Azure Key Vault
 
 ```bash
 # ---
@@ -54,8 +59,12 @@ az keyvault secret show --vault-name $kv_n --name "ExamplePassword" --query "val
 az keyvault secret show --vault-name $kv_n --name "MySecret" --query "value"
 ```
 
+---
+
+### Register and install required providers
+
 ```bash
-# POD Identity v1
+# POD Identity
 # Register the EnablePodIdentityPreview
 az feature register --name EnablePodIdentityPreview --namespace Microsoft.ContainerService
 # check installation status
@@ -67,16 +76,19 @@ az extension add --name aks-preview
 az extension update --name aks-preview
 # Review AKS preview installation (Installed true)
 az extension list-available --output table --query "[?contains(name, 'aks-preview')]"
+```
 
-# TODO assign policy through file
-# NOTE Policy assignments can take up to 20 minutes to sync into each cluster.
+---
 
+### Enable AAD Pod Management Identity - Kubenet AKS Configuration
 
+```bash
 # ---
-# Set up AKS
+# Set up Kubenet AKS
 # ---
 
-# Running aad-pod-identity in a cluster with Kubenet is not a recommended configuration because of the security implication. Please follow the mitigation steps and configure policies before enabling aad-pod-identity in a cluster with Kubenet.
+# Running aad-pod-identity in a cluster with Kubenet is not a recommended configuration because of the security implication.
+# Please follow the mitigation steps and configure policies before enabling aad-pod-identity in a cluster with Kubenet to limit the CAP_NET_RAW attack.
 
 # Mitigation
 # Enable AKS Built in Policy
@@ -86,25 +98,48 @@ az provider list -o table --query "[?contains(namespace, 'Microsoft.PolicyInsigh
 az aks enable-addons --addons azure-policy -g $app_rg -n $aks_cluster_n
 az aks show --query addonProfiles.azurepolicy -g $app_rg -n $aks_cluster_n
 
-# Apply aks built in policy Kubernetes cluster containers should only use allowed capabilities
+# Apply aks built in policy:
+# Kubernetes cluster containers should only use allowed capabilities
 RG_ID="$(az group show --name $app_rg --query "id" -otsv)"; echo $RG_ID
 
 az policy assignment create \
 --name $policy_n \
 --display-name "${policy_display_n}" \
 --scope ${RG_ID} \
---policy "${policy_id}" \
---params "${policy_param}"
+--policy "c26596ff-4d70-4e6a-9a30-c2506bd2f80c" \
+--params "{ \"requiredDropCapabilities\": { \"value\": [ \"NET_RAW\" ] } }"
+
+# Note Policy assignments can take up to 20 minutes to sync into each cluster.
+# We could validate aks policies from inside the cluster but you must be authenticated against the the cluster
+az aks get-credentials -g $app_rg -n $aks_cluster_n
+kubectl get constrainttemplates
+
+# Test AKS Policy by deploying a pod with NET_RAW Policy
+kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_cap_net_raw-disallowed.yaml
 
 # Enable pod-identity on our cluster
 # Update an existing AKS cluster with Kubenet network plugin
 az aks update -g $app_rg -n $aks_cluster_n --enable-pod-identity --enable-pod-identity-with-kubenet
 az aks show -g $app_rg -n $aks_cluster_n --query "podIdentityProfile"
+```
 
-# test
-# https://github.com/ArtiomLK/opa-aad-pod-identity-kubenet
+---
 
-# Create an User Managed Identity
+### Enable AAD Pod Management Identity - CNI AKS Configuration
+
+```bash
+# ---
+# Set up CNI AKS
+# ---
+az aks update -g $app_rg -n $aks_cluster_n --enable-pod-identity
+```
+
+---
+
+### Create a User Managed Identity
+
+```bash
+# Create a User Managed Identity
 az identity create \
 -g $app_rg \
 -n $aks_kv_id_n \
@@ -227,6 +262,7 @@ az policy assignment delete -n $policy_n -g $app_rg # paste your policy name
 - AKS
 - [MS | Docs | Azure Policy built-in definitions for Azure Kubernetes Service][4]
 - [MS | Docs | Install Azure Policy Add-on for AKS][5]
+- [MS | Docs | Secure your cluster with Azure Policy][8]
 
 [1]: https://docs.microsoft.com/en-us/azure/aks/developer-best-practices-pod-security
 [2]: https://docs.microsoft.com/en-us/azure/aks/use-azure-ad-pod-identity
@@ -235,3 +271,4 @@ az policy assignment delete -n $policy_n -g $app_rg # paste your policy name
 [5]: https://docs.microsoft.com/en-us/azure/governance/policy/concepts/policy-for-kubernetes#install-azure-policy-add-on-for-aks
 [6]: ./../aks_cni.md#create-an-azure-kubernetes-service-aks-with-azure-container-networking-interface-cni
 [7]: ./../aks_private_kubenet.md#create-a-private-azure-kubernetes-service-aks-with-kubenet
+[7]: https://docs.microsoft.com/en-us/azure/aks/use-azure-policy
