@@ -117,9 +117,12 @@ RG_ID="$(az group show --name $app_rg --query "id" -otsv)"; echo $RG_ID
 az policy assignment create \
 --name $policy_n \
 --display-name "${policy_display_n}" \
---scope ${RG_ID} \
+--scope $RG_ID \
 --policy "c26596ff-4d70-4e6a-9a30-c2506bd2f80c" \
---params "{ \"requiredDropCapabilities\": { \"value\": [ \"NET_RAW\" ] } }"
+--params "{ \"effect\": { \"value\":  \"deny\"  }, \"requiredDropCapabilities\": { \"value\": [ \"NET_RAW\" ] } }"
+
+# show policies at the rg scope
+az policy assignment list -g $app_rg
 
 # Note Policy assignments can take up to 20 minutes to sync into each cluster.
 # We could validate aks policies from inside the cluster but you must be authenticated against the the cluster
@@ -127,7 +130,12 @@ az aks get-credentials -g $app_rg -n $aks_cluster_n
 sudo kubectl get constrainttemplates
 
 # Test AKS Policy by deploying a pod with NET_RAW Policy
+# capability add NET_RAW
 sudo kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_cap_net_raw-disallowed.yaml
+# capability drop NET_RAW
+sudo kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_cap_net_raw-allowed.yaml
+# no Capabilities specified
+sudo kubectl apply -f hhttps://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_cap_net_raw-none.yaml
 
 # Enable pod-identity on our cluster
 # Update an existing AKS cluster with Kubenet network plugin
