@@ -6,6 +6,7 @@
   - You could follow these steps to create an AKS Cluster:
     - [AKS (CNI) Cluster][6]
     - [AKS (Kubenet) Cluster][7]
+- You must have Owner RBAC on your subscription to create the identity and assign role binding to the cluster identity.
 
 ## Code
 
@@ -32,8 +33,19 @@ kv_n="kv-$app-$env";                         echo $kv_n
 # ---
 # AKS
 # ---
-aks_cluster_n="aks-$app-$env";               echo $aks_cluster_n
-aks_kv_id_n="id-to-kv-$app-$env";            echo $aks_kv_id_n
+aks_cluster_n="aks-$app-$env";                                          echo $aks_cluster_n
+# KV
+aks_kv_ns="kv-test";                                                    echo $aks_kv_ns
+aks_kv_pod_identity="pod-identity-to-kv";                               echo $aks_kv_pod_identity
+# VMSS
+aks_vmss_ns="vmss-test";                                                echo $aks_vmss_ns
+aks_vmss_pod_identity="pod-identity-to-aks-vmss";                       echo $aks_vmss_pod_identity
+
+# ---
+# Management Identities
+# ---
+id_to_kv_n="id-to-kv-$app-$env";                                        echo $id_to_kv_n
+id_to_aks_vmss_n="id-to-aks-vmss-$app-$env";                            echo $id_to_aks_vmss_n
 
 # ---
 # Policy Mitigation for Kubenet
@@ -112,15 +124,20 @@ az policy assignment create \
 # Note Policy assignments can take up to 20 minutes to sync into each cluster.
 # We could validate aks policies from inside the cluster but you must be authenticated against the the cluster
 az aks get-credentials -g $app_rg -n $aks_cluster_n
-kubectl get constrainttemplates
+sudo kubectl get constrainttemplates
 
 # Test AKS Policy by deploying a pod with NET_RAW Policy
-kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_cap_net_raw-disallowed.yaml
+sudo kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_cap_net_raw-disallowed.yaml
 
 # Enable pod-identity on our cluster
 # Update an existing AKS cluster with Kubenet network plugin
 az aks update -g $app_rg -n $aks_cluster_n --enable-pod-identity --enable-pod-identity-with-kubenet
 az aks show -g $app_rg -n $aks_cluster_n --query "podIdentityProfile"
+
+# Test
+az aks get-credentials -g $app_rg -n $aks_cluster_n
+sudo kubectl api-versions
+# We should find: aadpodidentity.k8s.io/v1
 ```
 
 ---
@@ -132,47 +149,71 @@ az aks show -g $app_rg -n $aks_cluster_n --query "podIdentityProfile"
 # Set up CNI AKS
 # ---
 az aks update -g $app_rg -n $aks_cluster_n --enable-pod-identity
+
+# Test
+az aks get-credentials -g $app_rg -n $aks_cluster_n
+sudo kubectl api-versions
+# We should find: aadpodidentity.k8s.io/v1
 ```
 
 ---
 
-### Create a User Managed Identity
+### Configure Pod Managed Identities
 
 ```bash
-# Create a User Managed Identity
-az identity create \
--g $app_rg \
--n $aks_kv_id_n \
---tags $tags
+# ---
+# AAD Pod Managed Identity to access AKS NodePool VMSS (Pod Managed Identity 1)
+# ---
 
-az identity create --resource-group $app_rg --name $aks_kv_id_n
-IDENTITY_CLIENT_ID="$(az identity show -g $app_rg -n $aks_kv_id_n --query clientId -otsv)"; echo $IDENTITY_CLIENT_ID
-export IDENTITY_RESOURCE_ID="$(az identity show -g $app_rg -n $aks_kv_id_n --query id -otsv)"; echo $IDENTITY_RESOURCE_ID
-IDENTITY_PRINCIPALID=$(az identity show -g $app_rg -n $aks_kv_id_n --query principalId -o tsv); echo $IDENTITY_PRINCIPALID
+# Create an Azure User Managed Identity
+az identity create -g $app_rg -n $id_to_aks_vmss_n --tags $tags
 
-# Assign permissions for the managed identity
-# NODE_GROUP=$(az aks show -g myResourceGroup -n myAKSCluster --query nodeResourceGroup -o tsv)
-# NODES_RESOURCE_ID=$(az group show -n $NODE_GROUP -o tsv --query "id")
-# az role assignment create --role "Virtual Machine Contributor" --assignee "$IDENTITY_CLIENT_ID" --scope $NODES_RESOURCE_ID
+# Assign permissions to the Managed Identity to access AKS NodePool VMSS
+IDENTITY_CLIENT_ID_TO_AKS_VMSS="$(az identity show -g $app_rg -n $id_to_kv_n --query clientId -otsv)"; echo $IDENTITY_CLIENT_ID_TO_AKS_VMSS
+NODE_GROUP=$(az aks show -g $app_rg -n $aks_cluster_n --query nodeResourceGroup -otsv); echo $NODE_GROUP
+NODES_RESOURCE_ID=$(az group show -n $NODE_GROUP --query "id" -otsv); echo $NODES_RESOURCE_ID
 
-# Get your generated KeyVault Managed Identity resource ID
-az keyvault set-policy -n $kv_n --secret-permissions get --spn $IDENTITY_CLIENT_ID
+az role assignment create --role "Virtual Machine Contributor" --assignee "$IDENTITY_CLIENT_ID_TO_AKS_VMSS" --scope $NODES_RESOURCE_ID
 
 # Create a pod identity
-export POD_IDENTITY_NAME="my-pod-identity"; echo $POD_IDENTITY_NAME
-export POD_IDENTITY_NAMESPACE="my-app"; echo $POD_IDENTITY_NAMESPACE
+# You must have Owner RBAC on your subscription to create the identity and assign role binding to the cluster identity.
+IDENTITY_RESOURCE_ID_TO_AKS_VMSS="$(az identity show -g $app_rg -n $id_to_kv_n --query id -otsv)"; echo $IDENTITY_RESOURCE_ID_TO_AKS_VMSS
+
 az aks pod-identity add \
 --resource-group $app_rg \
 --cluster-name $aks_cluster_n \
---namespace ${POD_IDENTITY_NAMESPACE}  \
---name ${POD_IDENTITY_NAME} \
---identity-resource-id ${IDENTITY_RESOURCE_ID}
+--namespace $aks_vmss_ns \
+--name $aks_vmss_pod_identity \
+--identity-resource-id ${IDENTITY_RESOURCE_ID_TO_AKS_VMSS}
 
-az aks pod-identity list --cluster-name $aks_cluster_n --resource-group $app_rg
+# Check AAD Pod Managed Identity provisioningState and any linked pod-identity
+az aks pod-identity list --cluster-name $aks_cluster_n --resource-group $app_rg --query "podIdentityProfile"
 
-# Test
-sudo kubectl api-versions
 
+# ---
+# AAD Pod Managed Identity to access Key Vault (Pod Managed Identity 2)
+# ---
+
+# Create an Azure User Managed Identity
+az identity create -g $app_rg -n $id_to_kv_n --tags $tags
+
+# Assign permissions to the Managed Identity to access KV secrets
+IDENTITY_CLIENT_ID_TO_KV="$(az identity show -g $app_rg -n $id_to_kv_n --query clientId -otsv)"; echo $IDENTITY_CLIENT_ID_TO_KV
+az keyvault set-policy -n $kv_n --secret-permissions get --spn $IDENTITY_CLIENT_ID_TO_KV
+
+# Create a pod identity
+# You must have Owner RBAC on your subscription to create the identity and assign role binding to the cluster identity.
+IDENTITY_RESOURCE_ID_TO_KV="$(az identity show -g $app_rg -n $id_to_kv_n --query id -otsv)"; echo $IDENTITY_RESOURCE_ID_TO_KV
+
+az aks pod-identity add \
+--resource-group $app_rg \
+--cluster-name $aks_cluster_n \
+--namespace $aks_kv_ns  \
+--name $aks_kv_pod_identity \
+--identity-resource-id ${IDENTITY_RESOURCE_ID_TO_KV}
+
+# Check AAD Pod Managed Identity provisioningState and any linked pod-identity
+az aks pod-identity list --cluster-name $aks_cluster_n --resource-group $app_rg --query "podIdentityProfile"
 ```
 
 ```bash
@@ -250,6 +291,25 @@ az extension list-available --output table --query "[?contains(name, 'aks-previe
 # ---
 az policy assignment list -g $app_rg #find and copy the Policy name if required
 az policy assignment delete -n $policy_n -g $app_rg # paste your policy name
+
+# ---
+# Delete Pod Identities from the cluster
+# ---
+# AKS VMSS POD-IDENTITY
+az aks pod-identity delete \
+--resource-group $app_rg \
+--cluster-name $aks_cluster_n \
+--namespace $aks_vmss_ns \
+--name $aks_vmss_pod_identity
+# AKS KV POD-IDENTITY
+az aks pod-identity delete \
+--resource-group $app_rg \
+--cluster-name $aks_cluster_n \
+--namespace $aks_vmss_ns \
+--name $aks_vmss_pod_identity
+
+# Check AAD Pod Managed Identity provisioningState and any linked pod-identity
+az aks pod-identity list --cluster-name $aks_cluster_n --resource-group $app_rg --query "podIdentityProfile"
 ```
 
 ## Additional Resources
