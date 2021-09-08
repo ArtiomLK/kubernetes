@@ -35,10 +35,10 @@ kv_n="kv-$app-$env";                         echo $kv_n
 # ---
 aks_cluster_n="aks-$app-$env";                                          echo $aks_cluster_n
 # KV
-aks_kv_ns="kv-test";                                                    echo $aks_kv_ns
+aks_kv_ns="kv-demo";                                                    echo $aks_kv_ns
 aks_kv_pod_identity="pod-identity-to-kv";                               echo $aks_kv_pod_identity
 # VMSS
-aks_vmss_ns="vmss-test";                                                echo $aks_vmss_ns
+aks_vmss_ns="vmss-demo";                                                echo $aks_vmss_ns
 aks_vmss_pod_identity="pod-identity-to-aks-vmss";                       echo $aks_vmss_pod_identity
 
 # ---
@@ -135,7 +135,7 @@ sudo kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-ide
 # capability drop NET_RAW
 sudo kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_cap_net_raw-allowed.yaml
 # no Capabilities specified
-sudo kubectl apply -f hhttps://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_cap_net_raw-none.yaml
+sudo kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_cap_net_raw-none.yaml
 
 # Enable pod-identity on our cluster
 # Update an existing AKS cluster with Kubenet network plugin
@@ -166,7 +166,7 @@ sudo kubectl api-versions
 
 ---
 
-### Configure Pod Managed Identities
+### Configure Pod Managed Identities to access AKS NodePool VMSS
 
 ```bash
 # ---
@@ -177,15 +177,19 @@ sudo kubectl api-versions
 az identity create -g $app_rg -n $id_to_aks_vmss_n --tags $tags
 
 # Assign permissions to the Managed Identity to access AKS NodePool VMSS
-IDENTITY_CLIENT_ID_TO_AKS_VMSS="$(az identity show -g $app_rg -n $id_to_kv_n --query clientId -otsv)"; echo $IDENTITY_CLIENT_ID_TO_AKS_VMSS
+IDENTITY_CLIENT_ID_TO_AKS_VMSS="$(az identity show -g $app_rg -n $id_to_aks_vmss_n --query clientId -otsv)"; echo $IDENTITY_CLIENT_ID_TO_AKS_VMSS
 NODE_GROUP=$(az aks show -g $app_rg -n $aks_cluster_n --query nodeResourceGroup -otsv); echo $NODE_GROUP
 NODES_RESOURCE_ID=$(az group show -n $NODE_GROUP --query "id" -otsv); echo $NODES_RESOURCE_ID
 
 az role assignment create --role "Virtual Machine Contributor" --assignee "$IDENTITY_CLIENT_ID_TO_AKS_VMSS" --scope $NODES_RESOURCE_ID
 
+# Assign permissions to the Managed Identity to access Main RG VMs
+RG_ID=$(az group show -n $app_rg --query "id" -otsv); echo $RG_ID
+az role assignment create --role "Virtual Machine User Login" --assignee "$IDENTITY_CLIENT_ID_TO_AKS_VMSS" --scope $RG_ID
+
 # Create a pod identity
 # You must have Owner RBAC on your subscription to create the identity and assign role binding to the cluster identity.
-IDENTITY_RESOURCE_ID_TO_AKS_VMSS="$(az identity show -g $app_rg -n $id_to_kv_n --query id -otsv)"; echo $IDENTITY_RESOURCE_ID_TO_AKS_VMSS
+IDENTITY_RESOURCE_ID_TO_AKS_VMSS="$(az identity show -g $app_rg -n $id_to_aks_vmss_n --query id -otsv)"; echo $IDENTITY_RESOURCE_ID_TO_AKS_VMSS
 
 az aks pod-identity add \
 --resource-group $app_rg \
@@ -197,7 +201,37 @@ az aks pod-identity add \
 # Check AAD Pod Managed Identity provisioningState and any linked pod-identity
 az aks pod-identity list --cluster-name $aks_cluster_n --resource-group $app_rg --query "podIdentityProfile"
 
+# ---
+# Run a sample App to access AKS NodePool VMSS
+# ---
 
+# Copy the following pod.yaml template from:
+# https://raw.githubusercontent.com/ArtiomLK/kubernetes/main/definitionFiles/pod/pod-managed-identity-to-aks-vmss.yaml
+
+# Within the Pod definition file (the .yaml file). Replace the following:
+# metadata.namespace: $aks_vmss_ns
+echo $aks_vmss_ns
+# metadata.labels.aadpodidbinding: $aks_vmss_ns
+echo $aks_vmss_pod_identity
+#  spec.containers[0].args $SUBSCRIPTION_ID
+az account show --query "id"
+#  spec.containers[0].args $IDENTITY_CLIENT_ID_TO_AKS_VMSS
+echo $IDENTITY_CLIENT_ID_TO_AKS_VMSS
+# spec.containers[0].args $IDENTITY_RESOURCE_GROUP
+echo $app_rg # this is the RESOURCE_GROUP where the Managed Identity was created
+
+# Create the pod
+sudo kubectl apply -f pod-managed-identity-to-aks-vmss.yaml
+
+# verify the app successfully prints the AKS nodePool vmss logs
+sudo kubectl logs pod-managed-id-to-aks-vmss --follow --namespace  $aks_vmss_ns
+```
+
+---
+
+### Configure Pod Managed Identities to access Key Vault
+
+```bash
 # ---
 # AAD Pod Managed Identity to access Key Vault (Pod Managed Identity 2)
 # ---
@@ -222,6 +256,11 @@ az aks pod-identity add \
 
 # Check AAD Pod Managed Identity provisioningState and any linked pod-identity
 az aks pod-identity list --cluster-name $aks_cluster_n --resource-group $app_rg --query "podIdentityProfile"
+
+# ---
+# Run a sample App to access our Key Vault
+# ---
+
 ```
 
 ```bash
