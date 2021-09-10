@@ -10,8 +10,6 @@
 
 ## Code
 
----
-
 ### Initialize params
 
 ```bash
@@ -50,7 +48,7 @@ id_to_aks_vmss_n="id-to-aks-vmss-$app-$env";                            echo $id
 # ---
 # Policy Mitigation for Kubenet
 # ---
-policy_n="AAD_POD_IDENTITY_MITIGATION_POLICY"; echo $policy_n
+policy_n="AAD_POD_IDENTITY_MITIGATION_POLICY";                          echo $policy_n
 policy_display_n="Kubernetes cluster containers should only use allowed capabilities"; echo $policy_display_n
 ```
 
