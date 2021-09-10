@@ -354,51 +354,6 @@ sudo kubectl exec busybox-secrets-store-inline -- cat /mnt/secrets-store/secret1
 sudo kubectl exec busybox-secrets-store-inline -- cat /mnt/secrets-store/secret2
 ```
 
-```bash
-# ---
-# Install dependencies
-# ---
-# Register the EnablePodIdentityPreview
-az feature register --name EnablePodIdentityPreview --namespace Microsoft.ContainerService
-# check installation status
-az feature list -o table --query "[?contains(name, 'Microsoft.ContainerService/EnablePodIdentityPreview')].{Name:name,State:properties.state}"
-
-# register the Secret Provider
-az feature register --name AKS-AzureKeyVaultSecretsProvider --namespace Microsoft.ContainerService
-# Check if registered
-az feature list -o table --query "[?contains(name, 'Microsoft.ContainerService/AKS-AzureKeyVaultSecretsProvider')].{Name:name,State:properties.state}"
-
-# When ready, refresh the registration of the Microsoft.ContainerService ()AKS) resource provider by using the az provider register command:
-az provider register -n Microsoft.ContainerService
-# check installation status
-az provider list -o table --query "[?contains(namespace, 'Microsoft.ContainerService')]"
-
-# Enable AKS preview
-az extension add --name aks-preview
-# Update the extension to make sure you have the latest version installed
-az extension update --name aks-preview
-# Review AKS preview installation (Installed true)
-az extension list-available --output table --query "[?contains(name, 'aks-preview')]"
-
-# ---
-# Create a KV
-# ---
-az keyvault create --name $kv_n --resource-group $app_rg --location $l --tags $tags
-# add a secret to the KV
-az keyvault secret set --vault-name $kv_n --name "ExamplePassword" --value "123456789"
-# retrieve secrets from KV
-az keyvault secret show --vault-name $kv_n --name "ExamplePassword" --query "value"
-
-# ---
-# Set up AKS
-# ---
-# Enable pod-identity on our cluster
-# az aks update -g $app_rg -n $aks_cluster_n --enable-pod-identity
-
-
-
-```
-
 ## Clean-up
 
 ```bash
