@@ -61,12 +61,17 @@ policy_display_n="Kubernetes cluster containers should only use allowed capabili
 # Create a KV
 # ---
 az keyvault create --name $kv_n --resource-group $app_rg --location $l --tags $tags
-# add a secret to the KV
+# add a secrets to the KV
+az keyvault secret set --vault-name $kv_n --name "secret1" --value "secret1val"
+az keyvault secret set --vault-name $kv_n --name "secret2" --value "secret2val"
 az keyvault secret set --vault-name $kv_n --name "ExamplePassword" --value "Password123!"
 az keyvault secret set --vault-name $kv_n --name "MySecret" --value "someSecret"
+
 # retrieve secrets from KV
 az keyvault secret show --vault-name $kv_n --name "ExamplePassword" --query "value"
 az keyvault secret show --vault-name $kv_n --name "MySecret" --query "value"
+az keyvault secret show --vault-name $kv_n --name "secret1" --query "value"
+az keyvault secret show --vault-name $kv_n --name "secret2" --query "value"
 ```
 
 ---
@@ -254,11 +259,99 @@ az aks pod-identity add \
 
 # Check AAD Pod Managed Identity provisioningState and any linked pod-identity
 az aks pod-identity list --cluster-name $aks_cluster_n --resource-group $app_rg --query "podIdentityProfile"
+```
+
+---
+
+### Configure Pod Managed Identities to access Key Vault with (CSI) Container Storage Interface Secret Store Driver
+
+```bash
+# ---
+# Enable Managed Identity on AKS
+# ---
+# EXPECTED RESULT {"clientId": "msi"}
+az aks show -g $app_rg -n $aks_cluster_n --query "servicePrincipalProfile"
+# ---
+# Otherwise enable Managed Identity on AKS IF RESULT ISN'T {"clientId": "msi"}
+az aks update -g $app_rg -n $aks_cluster_n --enable-managed-identity # RUN ONLY IF RESULT ISN'T {"clientId": "msi"}
+# To complete the update to managed identity upgrade the nodepools. e.g.
+az aks nodepool upgrade --node-image-only -g $app_rg --cluster-name $aks_cluster_n -n nodepool1
+
+# rerun ACR to AKS attachment
+# https://github.com/ArtiomLK/kubernetes/blob/main/azure/examples/snippets/aks_attach_acr.md
 
 # ---
-# Run a sample App to access our Key Vault
+# Setup the SecretProvider
+# ---
+# register the Secret Provider
+az feature register --name AKS-AzureKeyVaultSecretsProvider --namespace Microsoft.ContainerService
+# Check if registered
+az feature list -o table --query "[?contains(name, 'Microsoft.ContainerService/AKS-AzureKeyVaultSecretsProvider')].{Name:name,State:properties.state}"
+# When ready, refresh the registration of the Microsoft.ContainerService resource provider by using the az provider register command:
+az provider register --namespace Microsoft.ContainerService
+# check installation status
+az provider list -o table --query "[?contains(namespace, 'Microsoft.ContainerService')]"
+
+# REGISTER AKS FOR SECRET STORE CSI DRIVER SUPPORT
+az aks enable-addons \
+--name $aks_cluster_n \
+--resource-group $app_rg \
+--addons azure-keyvault-secrets-provider
+# Verify aks-secrets-store-csi-driver and providers but first Connect to your AKS cluster
+az aks get-credentials -g $app_rg -n $aks_cluster_n --overwrite-existing
+# Verify
+kubectl get pods -n kube-system -l 'app in (secrets-store-csi-driver, secrets-store-provider-azure)'
+
+# ---
+# Configure the SecretProvider Files
 # ---
 
+# NOTE: The SecretProviderClass has to be in the same namespace as the pod referencing it.
+# YOU MUST REPLACE from the pod-managed-secret-provider.yaml file the following parameters
+echo $aks_kv_ns # metadata.namespace
+echo $kv_n # spec.parameters.keyvaultName
+az account show --query tenantId # spec.parameters.tenantId
+
+# ---
+# Deploy the SecretProvider Files
+# ---
+kubectl apply -f secret-pod-managed-secret-provider.yaml
+# Verify if secretProviderClass created
+kubectl get SecretProviderClass -n $aks_kv_ns
+# kubectl describe SecretProviderClass azure-kvname
+
+# ---
+# Configure a sample App to access our Key Vault
+# ---
+# YOU MUST REPLACE from the pod-def-w-secrets-busybox-managed-pod.yaml file the following parameters
+# Within the Pod definition file (the .yaml file). Replace the following:
+# metadata.namespace: $aks_vmss_ns
+echo $aks_kv_ns
+# metadata.labels.aadpodidbinding: $aks_vmss_ns
+echo $aks_kv_pod_identity
+#  spec.containers[0].args.subscriptionid
+az account show --query "id"
+#  spec.containers[0].args.clientid
+echo $IDENTITY_CLIENT_ID_TO_KV
+# spec.containers[0].args.resourcegroup
+echo $app_rg # this is the RESOURCE_GROUP where the Managed Identity was created
+
+sudo kubectl apply -f pod-def-w-secrets-busybox.yaml
+sudo kubectl get pods -n $aks_kv_ns
+
+# ---
+# Test access with authorization to KeyVault Secrets
+# ---
+
+## show secrets held in secrets-store
+sudo kubectl exec busybox-secrets-store-inline -- ls /mnt/secrets-store/
+## print a test secret 'ExampleSecret' held in secrets-store
+sudo kubectl exec busybox-secrets-store-inline -it -- sh
+
+sudo kubectl exec busybox-secrets-store-inline -- cat /mnt/secrets-store/ExamplePassword
+sudo kubectl exec busybox-secrets-store-inline -- cat /mnt/secrets-store/MySecret
+sudo kubectl exec busybox-secrets-store-inline -- cat /mnt/secrets-store/secret1
+sudo kubectl exec busybox-secrets-store-inline -- cat /mnt/secrets-store/secret2
 ```
 
 ```bash
@@ -377,3 +470,4 @@ az aks pod-identity list --cluster-name $aks_cluster_n --resource-group $app_rg 
 [6]: ./../aks_cni.md#create-an-azure-kubernetes-service-aks-with-azure-container-networking-interface-cni
 [7]: ./../aks_private_kubenet.md#create-a-private-azure-kubernetes-service-aks-with-kubenet
 [7]: https://docs.microsoft.com/en-us/azure/aks/use-azure-policy
+[8]: .././snippets/aks_attach_acr.md
