@@ -208,10 +208,7 @@ az aks pod-identity list --cluster-name $aks_cluster_n --resource-group $app_rg 
 # Run a sample App to access AKS NodePool VMSS
 # ---
 
-# Copy the following pod.yaml template from:
-# https://raw.githubusercontent.com/ArtiomLK/kubernetes/main/definitionFiles/pod/pod-managed-identity-to-aks-vmss.yaml
-
-# Within the Pod definition file (the .yaml file). Replace the following:
+# Modify the pod-managed-identity-to-aks-vmss.yaml file. Replace the following:
 # metadata.namespace: $aks_vmss_ns
 echo $aks_vmss_ns
 # metadata.labels.aadpodidbinding: $aks_vmss_ns
@@ -305,7 +302,6 @@ kubectl get pods -n kube-system -l 'app in (secrets-store-csi-driver, secrets-st
 # ---
 # Configure the SecretProvider Files
 # ---
-
 # NOTE: The SecretProviderClass has to be in the same namespace as the pod referencing it.
 # YOU MUST REPLACE from the pod-managed-secret-provider.yaml file the following parameters
 echo $aks_kv_ns # metadata.namespace
@@ -323,8 +319,7 @@ kubectl get SecretProviderClass -n $aks_kv_ns
 # ---
 # Configure a sample App to access our Key Vault
 # ---
-# YOU MUST REPLACE from the pod-def-w-secrets-busybox-managed-pod.yaml file the following parameters
-# Within the Pod definition file (the .yaml file). Replace the following:
+# Modify the pod-managed-identity-to-kv.yaml file. Replace the following:
 # metadata.namespace: $aks_vmss_ns
 echo $aks_kv_ns
 # metadata.labels.aadpodidbinding: $aks_vmss_ns
@@ -336,7 +331,7 @@ echo $IDENTITY_CLIENT_ID_TO_KV
 # spec.containers[0].args.resourcegroup
 echo $app_rg # this is the RESOURCE_GROUP where the Managed Identity was created
 
-sudo kubectl apply -f pod-def-w-secrets-busybox.yaml
+sudo kubectl apply -f pod-managed-identity-to-kv.yaml
 sudo kubectl get pods -n $aks_kv_ns
 
 # ---
@@ -405,6 +400,12 @@ az aks pod-identity delete \
 az aks pod-identity list --cluster-name $aks_cluster_n --resource-group $app_rg --query "podIdentityProfile"
 ```
 
+## Notes
+
+> Managed identities are essentially a wrapper around service principals, and make their management simpler. Credential rotation for MI happens automatically every 46 days according to Azure Active Directory default. AKS uses both system-assigned and user-assigned managed identity types. These identities are currently immutable. To learn more, read about managed identities for Azure resources. [link][9]
+
+---
+
 ## Additional Resources
 
 - Pod ID
@@ -416,6 +417,7 @@ az aks pod-identity list --cluster-name $aks_cluster_n --resource-group $app_rg 
 - [MS | Docs | Azure Policy built-in definitions for Azure Kubernetes Service][4]
 - [MS | Docs | Install Azure Policy Add-on for AKS][5]
 - [MS | Docs | Secure your cluster with Azure Policy][8]
+- [MS | Docs | Use managed identities in Azure Kubernetes Service][9]
 
 [1]: https://docs.microsoft.com/en-us/azure/aks/developer-best-practices-pod-security
 [2]: https://docs.microsoft.com/en-us/azure/aks/use-azure-ad-pod-identity
@@ -426,3 +428,4 @@ az aks pod-identity list --cluster-name $aks_cluster_n --resource-group $app_rg 
 [7]: ./../aks_private_kubenet.md#create-a-private-azure-kubernetes-service-aks-with-kubenet
 [7]: https://docs.microsoft.com/en-us/azure/aks/use-azure-policy
 [8]: .././snippets/aks_attach_acr.md
+[9]: https://docs.microsoft.com/en-us/azure/aks/use-managed-identity
