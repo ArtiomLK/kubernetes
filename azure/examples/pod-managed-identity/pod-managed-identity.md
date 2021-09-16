@@ -379,6 +379,8 @@ az extension list-available --output table --query "[?contains(name, 'aks-previe
 # ---
 az policy assignment list -g $app_rg #find and copy the Policy name if required
 az policy assignment delete -n $policy_n -g $app_rg # paste your policy name
+# Remove the azure policy add-on from AKS * If not using the feature at all
+az aks disable-addons --addons azure-policy -g $app_rg -n $aks_cluster_n
 
 # ---
 # Delete Pod Identities from the cluster
@@ -398,11 +400,23 @@ az aks pod-identity delete \
 
 # Check AAD Pod Managed Identity provisioningState and any linked pod-identity
 az aks pod-identity list --cluster-name $aks_cluster_n --resource-group $app_rg --query "podIdentityProfile"
+
+# ---
+# Delete the created User Identities
+# ---
+# Identity to access aks nodepool vmss
+az identity delete -g $app_rg -n $id_to_aks_vmss_n
+# Identity to access Azure key Vault
+az identity delete -g $app_rg -n $id_to_kv_n
 ```
 
 ## Notes
 
 > Managed identities are essentially a wrapper around service principals, and make their management simpler. Credential rotation for MI happens automatically every 46 days according to Azure Active Directory default. AKS uses both system-assigned and user-assigned managed identity types. These identities are currently immutable. To learn more, read about managed identities for Azure resources. [link][9]
+
+</br>
+
+> Deleting a user-assigned managed identity won't remove the reference from any resource it was assigned to. Remove those from a VM or virtual machine scale set by using the az vm/vmss identity remove command. [link][10]
 
 ---
 
@@ -429,3 +443,4 @@ az aks pod-identity list --cluster-name $aks_cluster_n --resource-group $app_rg 
 [7]: https://docs.microsoft.com/en-us/azure/aks/use-azure-policy
 [8]: .././snippets/aks_attach_acr.md
 [9]: https://docs.microsoft.com/en-us/azure/aks/use-managed-identity
+[10]: https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-manage-user-assigned-managed-identities?pivots=identity-mi-methods-azcli#delete-a-user-assigned-managed-identity-1
