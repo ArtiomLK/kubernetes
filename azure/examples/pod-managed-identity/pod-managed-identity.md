@@ -45,8 +45,8 @@ export MSYS_NO_PATHCONV=1
 # ---
 # Main Vars
 # ---
-app="confidential";                                                     echo $app
-env="dev";                                                             echo $env
+app="secureaks";                                                        echo $app
+env="prod";                                                             echo $env
 l="eastus2";                                                            echo $l
 tags="env=$env app=$app";                                               echo $tags
 app_rg="rg-$app-$env";                                                  echo $app_rg
@@ -199,15 +199,15 @@ az aks get-credentials -g $app_rg -n $aks_cluster_n
 kubectl get constrainttemplates
 
 # Test AKS Policy by deploying a pod with NET_RAW Policy
-# capability add NET_RAW
-kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_cap_net_raw-disallowed.yaml
-kubectl delete -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_cap_net_raw-disallowed.yaml
+# capability allow NET_RAW
+kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_allow_net_raw.yaml.yaml
+kubectl delete -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_allow_net_raw.yaml.yaml
 # capability drop NET_RAW
-kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_cap_net_raw-allowed.yaml
-kubectl delete -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_cap_net_raw-allowed.yaml
+kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_drop_net_raw.yaml
+kubectl delete -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_drop_net_raw.yaml
 # no Capabilities specified
-kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_cap_net_raw-none.yaml
-kubectl delete -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_cap_net_raw-none.yaml
+kubectl apply -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_no_capabilities_specified.yaml
+kubectl delete -f https://raw.githubusercontent.com/ArtiomLK/opa-aad-pod-identity-kubenet/main/pod_no_capabilities_specified.yaml
 
 # Enable pod-identity on our cluster
 # Update an existing AKS cluster with Kubenet network plugin
@@ -366,6 +366,8 @@ kubectl get pods -n $aks_kv_ns
 kubectl apply -f pod-managed-identity-to-kv-wrong-ns.yaml
 kubectl get pods
 
+kubectl delete -f pod-managed-identity-to-kv.yaml
+kubectl delete -f pod-managed-identity-to-kv-wrong-ns.yaml
 ```
 
 ### Configure Pod Managed Identities to access AKS NodePool VMSS
@@ -430,7 +432,7 @@ kubectl apply -f pod-managed-identity-to-aks-vmss-wrong-ns.yaml
 
 # verify the app successfully prints the AKS nodePool vmss logs
 kubectl get po
-kubectl logs pod-managed-id-to-aks-vmss --follow
+kubectl logs pod-managed-id-to-aks-vmss-wrong-ns --follow
 ```
 
 ---
