@@ -45,7 +45,7 @@ export MSYS_NO_PATHCONV=1
 # ---
 # Main Vars
 # ---
-app="secureaks";                                                        echo $app
+app="confidential";                                                     echo $app
 env="prod";                                                             echo $env
 l="eastus2";                                                            echo $l
 tags="env=$env app=$app";                                               echo $tags
