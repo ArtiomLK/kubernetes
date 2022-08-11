@@ -56,7 +56,7 @@ az aks create \
 # ---
 az keyvault create --name $kv_n --resource-group $app_rg --location $l --tags $tags
 # add a secret to the KV
-az keyvault secret set --vault-name $kv_n --name "ExamplePassword" --value "light"
+az keyvault secret set --vault-name $kv_n --name "ExamplePassword" --value "123456789"
 az keyvault secret set --vault-name $kv_n --name "MySecret" --value "123"
 az keyvault certificate create --vault-name $kv_n --name "MyCert" --policy "$(az keyvault certificate get-default-policy)"
 az keyvault key create --vault-name $kv_n --name "MyKey" --protection software
