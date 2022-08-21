@@ -97,7 +97,7 @@ All these CLI commands require us to login into azure `az login` and point to th
    aks_cluster_count_cni="3";                   echo $aks_cluster_count_cni
    aks_node_max_pod_cni="110";                  echo $aks_node_max_pod_cni
    aks_cluster_count="3";                       echo $aks_cluster_count
-   aks_v_cni="1.20.7";                          echo $aks_v_cni
+   aks_v_cni="1.23.8";                          echo $aks_v_cni
    aks_node_size_cni="Standard_B2s";            echo $aks_node_size_cni
    aks_id_n_cni="id-$app-aks-cni-$env";         echo $aks_id_n_cni
 

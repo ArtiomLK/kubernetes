@@ -100,7 +100,7 @@ All these CLI commands require us to login into azure `az login` and point to th
    snet_addr_aks="$vnet_pre.8.0/21";            echo $snet_addr_aks
    aks_cluster_n="aks-$app-$env";               echo $aks_cluster_n
    aks_cluster_count="3";                       echo $aks_cluster_count
-   aks_v="1.20.7";                              echo $aks_v
+   aks_v="1.23.8";                              echo $aks_v
    aks_node_size="Standard_B2s";                echo $aks_node_size
    aks_id_n="id-$app-$env";                     echo $aks_id_n
    # AKS CNI Network Plugin
