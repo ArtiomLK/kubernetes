@@ -346,7 +346,7 @@ az feature unregister --namespace "Microsoft.ContainerService" --name "AKS-Azure
 az feature list -o table --query "[?contains(name, 'Microsoft.ContainerService/AKS-AzureKeyVaultSecretsProvider')].{Name:name,State:properties.state}"
 
 az group delete -n $app_rg -y
-az group delete -n $kg_rg -y
+az group delete -n $kv_rg -y
 az keyvault purge --name $kv_n --location $l --no-wait
 ```
 
@@ -356,13 +356,19 @@ az keyvault purge --name $kv_n --location $l --no-wait
 - [MS | Docs | Use the Secrets Store CSI Driver for Kubernetes in an Azure Kubernetes Service (AKS) cluster (preview)][4]
 - CSI
 - [CSI | Docs | Sync as Kubernetes Secret][2]
+- [CSI | Docs | Secret Auto Rotation][8]
+- [CSI | Docs | Best Practices][9]
 - KV
 - [MS | Docs | Set and retrieve a secret from Azure Key Vault using Azure CLI][3]
 - RBAC
-- [MS | Docs | Assign Azure roles using Azure CLI][6]
+- [MS | Docs | Azure built-in roles][6]
+- [MS | Docs | Assign Azure roles using Azure CLI][7]
 
 [2]: https://secrets-store-csi-driver.sigs.k8s.io/topics/sync-as-kubernetes-secret.html
 [3]: https://docs.microsoft.com/en-us/azure/key-vault/secrets/quick-create-cli
 [4]: https://docs.microsoft.com/en-us/azure/aks/csi-secrets-store-driver
 [5]: ./../aks_cni.md#create-an-azure-kubernetes-service-aks-with-azure-container-networking-interface-cni
 [6]: https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-cli
+[7]: https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
+[8]: https://secrets-store-csi-driver.sigs.k8s.io/topics/secret-auto-rotation.html
+[9]: https://secrets-store-csi-driver.sigs.k8s.io/topics/best-practices.html
