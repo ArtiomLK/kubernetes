@@ -353,7 +353,7 @@ az keyvault purge --name $kv_n --location $l --no-wait
 ## Additional Resources
 
 - AKS
-- [MS | Docs | Use the Secrets Store CSI Driver for Kubernetes in an Azure Kubernetes Service (AKS) cluster (preview)][4]
+- [MS | Docs | Use the Azure Key Vault Provider for Secrets Store CSI Driver in an AKS cluster][4]
 - CSI
 - [CSI | Docs | Sync as Kubernetes Secret][2]
 - [CSI | Docs | Secret Auto Rotation][8]
