@@ -62,7 +62,7 @@ kv_n="kv-$app-$env";                                                    echo $kv
 # ---
 aks_cluster_n="aks-$app-$env";                                          echo $aks_cluster_n
 aks_node_count="3";                                                     echo $aks_node_count
-aks_v="1.20.9";                                                         echo $aks_v
+aks_v="1.23.8";                                                         echo $aks_v
 aks_node_size="Standard_B2s";                                           echo $aks_node_size
 # KV
 aks_kv_ns="kv-demo";                                                    echo $aks_kv_ns
