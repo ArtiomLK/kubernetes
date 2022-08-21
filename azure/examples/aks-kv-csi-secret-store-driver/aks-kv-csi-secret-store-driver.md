@@ -363,6 +363,7 @@ az keyvault purge --name $kv_n --location $l --no-wait
 - [MS | Docs | Set and retrieve a secret from Azure Key Vault using Azure CLI][3]
 - RBAC
 - [MS | Docs | Azure built-in roles][7]
+- [MS | Docs | Provide access to Key Vault keys, certificates, and secrets with an Azure role-based access control][11]
 - [MS | Docs | Assign Azure roles using Azure CLI][6]
 
 [2]: https://secrets-store-csi-driver.sigs.k8s.io/topics/sync-as-kubernetes-secret.html
@@ -374,3 +375,4 @@ az keyvault purge --name $kv_n --location $l --no-wait
 [8]: https://secrets-store-csi-driver.sigs.k8s.io/topics/secret-auto-rotation.html
 [9]: https://secrets-store-csi-driver.sigs.k8s.io/topics/best-practices.html
 [10]: https://samcogan.com/creating-kubernetes-secrets-from-azure-key-vault-with-the-csi-driver
+[11]: https://docs.microsoft.com/en-us/azure/key-vault/general/rbac-guide
