@@ -361,8 +361,8 @@ az keyvault purge --name $kv_n --location $l --no-wait
 - KV
 - [MS | Docs | Set and retrieve a secret from Azure Key Vault using Azure CLI][3]
 - RBAC
-- [MS | Docs | Azure built-in roles][6]
-- [MS | Docs | Assign Azure roles using Azure CLI][7]
+- [MS | Docs | Azure built-in roles][7]
+- [MS | Docs | Assign Azure roles using Azure CLI][6]
 
 [2]: https://secrets-store-csi-driver.sigs.k8s.io/topics/sync-as-kubernetes-secret.html
 [3]: https://docs.microsoft.com/en-us/azure/key-vault/secrets/quick-create-cli
