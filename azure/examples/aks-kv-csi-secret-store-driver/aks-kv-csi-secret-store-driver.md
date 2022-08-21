@@ -360,7 +360,7 @@ az keyvault purge --name $kv_n --location $l --no-wait
 - CSI
 - [CSI | Docs | Sync as Kubernetes Secret][2]
 - [CSI | Docs | Secret Auto Rotation][8]
-- [CSI | Docs | Secrets Store CSI Driver][12]
+- [CSI | Docs | Command Reference][12]
 - [CSI | Docs | Best Practices][9]
 - KV
 - [MS | Docs | Set and retrieve a secret from Azure Key Vault using Azure CLI][3]
