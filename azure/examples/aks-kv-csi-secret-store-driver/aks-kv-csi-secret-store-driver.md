@@ -354,10 +354,13 @@ az keyvault purge --name $kv_n --location $l --no-wait
 
 - AKS
 - [MS | Docs | Use the Azure Key Vault Provider for Secrets Store CSI Driver in an AKS cluster][4]
+- [MS | Docs | Provide an identity to access the Azure Key Vault Provider for Secrets Store CSI Driver][14]
+- [MS | Docs | Container Storage Interface (CSI) drivers on Azure Kubernetes Service (AKS)][13]
 - [Blog | SamCogan | Creating Kubernetes Secrets from Azure Key Vault with the CSI Driver][10]
 - CSI
 - [CSI | Docs | Sync as Kubernetes Secret][2]
 - [CSI | Docs | Secret Auto Rotation][8]
+- [CSI | Docs | Secrets Store CSI Driver][12]
 - [CSI | Docs | Best Practices][9]
 - KV
 - [MS | Docs | Set and retrieve a secret from Azure Key Vault using Azure CLI][3]
@@ -376,3 +379,6 @@ az keyvault purge --name $kv_n --location $l --no-wait
 [9]: https://secrets-store-csi-driver.sigs.k8s.io/topics/best-practices.html
 [10]: https://samcogan.com/creating-kubernetes-secrets-from-azure-key-vault-with-the-csi-driver
 [11]: https://docs.microsoft.com/en-us/azure/key-vault/general/rbac-guide
+[12]: https://secrets-store-csi-driver.sigs.k8s.io/topics/command-reference.html
+[13]: https://docs.microsoft.com/en-us/azure/aks/csi-storage-driver
+[14]: https://docs.microsoft.com/en-us/azure/aks/csi-secrets-store-identity-access
