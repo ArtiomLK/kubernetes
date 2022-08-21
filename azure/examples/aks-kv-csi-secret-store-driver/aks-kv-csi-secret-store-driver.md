@@ -207,7 +207,7 @@ az role assignment create \
 # az keyvault set-policy -n $kv_n --secret-permissions get --spn $ID_KVPROVIDER_CLIENT_ID
 ```
 
-## Sync CSI Driver Secrets to Pod Volumes
+## Sync CSI (Container Storage Interface) Secret Store Driver to Pod Volumes
 
 ```bash
 # YOU MUST REPLACE from the secret-provider-to-pod-volumes.yaml file the following parameters
@@ -257,7 +257,7 @@ kubectl exec busybox-w-secrets-from-pod-volume -- cat /mnt/secrets-store/kv-secr
 kubectl exec busybox-w-secrets-from-pod-volume -- cat /mnt/secrets-store/kv-secret-2
 ```
 
-## Sync CSI Secrets to k8s Secret
+## Sync CSI (Container Storage Interface) Secret Store Driver to k8s Secret
 
 ```bash
 # YOU MUST REPLACE from the secret-provider.yaml file the following parameters
