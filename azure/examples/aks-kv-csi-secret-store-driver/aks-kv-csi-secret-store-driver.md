@@ -29,8 +29,6 @@ aks_node_count="3";                                   echo $aks_node_count
 aks_v="1.23.8";                                       echo $aks_v
 aks_node_size="Standard_B2s";                         echo $aks_node_size
 aks_ns="kv-ns";                                       echo $aks_ns
-# ID
-aks_id_n="id-$app-aks-$env";                          echo $aks_id_n
 ```
 
 ### Create Resource Groups
