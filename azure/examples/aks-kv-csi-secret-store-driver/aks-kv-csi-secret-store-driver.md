@@ -156,7 +156,7 @@ az keyvault certificate show --vault-name $kv_n --name "MyCert" --query "cer"
 az keyvault key show --vault-name $kv_n --name "MyKey" --query "key.n"
 ```
 
-### Enable Manged Identity on AKS
+### Set up CSI (Container Storage Interface) Secret Store Driver
 
 ```bash
 # EXPECTED RESULT {"clientId": "msi"}
