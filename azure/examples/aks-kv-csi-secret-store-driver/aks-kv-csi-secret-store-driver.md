@@ -354,6 +354,7 @@ az keyvault purge --name $kv_n --location $l --no-wait
 
 - AKS
 - [MS | Docs | Use the Azure Key Vault Provider for Secrets Store CSI Driver in an AKS cluster][4]
+- [Blog | SamCogan | Creating Kubernetes Secrets from Azure Key Vault with the CSI Driver][10]
 - CSI
 - [CSI | Docs | Sync as Kubernetes Secret][2]
 - [CSI | Docs | Secret Auto Rotation][8]
@@ -372,3 +373,4 @@ az keyvault purge --name $kv_n --location $l --no-wait
 [7]: https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
 [8]: https://secrets-store-csi-driver.sigs.k8s.io/topics/secret-auto-rotation.html
 [9]: https://secrets-store-csi-driver.sigs.k8s.io/topics/best-practices.html
+[10]: https://samcogan.com/creating-kubernetes-secrets-from-azure-key-vault-with-the-csi-driver
