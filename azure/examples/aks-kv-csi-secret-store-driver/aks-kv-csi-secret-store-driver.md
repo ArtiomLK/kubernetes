@@ -380,5 +380,5 @@ az keyvault purge --name $kv_n --location $l --no-wait
 [10]: https://samcogan.com/creating-kubernetes-secrets-from-azure-key-vault-with-the-csi-driver
 [11]: https://docs.microsoft.com/en-us/azure/key-vault/general/rbac-guide
 [12]: https://secrets-store-csi-driver.sigs.k8s.io/topics/command-reference.html
-[13]: https://docs.microsoft.com/en-us/azure/aks/csi-storage-driver
+[13]: https://docs.microsoft.com/en-us/azure/aks/csi-storage-drivers
 [14]: https://docs.microsoft.com/en-us/azure/aks/csi-secrets-store-identity-access
