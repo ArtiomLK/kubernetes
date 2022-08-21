@@ -111,7 +111,7 @@ az role assignment create \
 --role "Key Vault Secrets Officer" \
 --scope $KV_ID
 
-# https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#key-vault-secrets-officer
+# https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#key-vault-secrets-user
 az role assignment create \
 --assignee $USER_N \
 --role "Key Vault Secrets User" \
@@ -137,7 +137,7 @@ az role assignment create \
 --role "Key Vault Crypto Officer" \
 --scope $KV_ID
 
-# https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#key-vault-crypto-officer
+# https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#key-vault-crypto-user
 az role assignment create \
 --assignee $USER_N \
 --role "Key Vault Crypto User" \
