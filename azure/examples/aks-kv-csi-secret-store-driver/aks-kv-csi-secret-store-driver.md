@@ -156,10 +156,9 @@ az keyvault certificate show --vault-name $kv_n --name "MyCert" --query "cer"
 az keyvault key show --vault-name $kv_n --name "MyKey" --query "key.n"
 ```
 
+### Enable Manged Identity on AKS
+
 ```bash
-# ---
-# Enable Manged Identity on AKS
-# ---
 # EXPECTED RESULT {"clientId": "msi"}
 az aks show -g $app_rg -n $aks_cluster_n --query "servicePrincipalProfile"
 # ---
