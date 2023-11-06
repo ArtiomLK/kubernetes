@@ -51,7 +51,7 @@ All these CLI commands require us to login into azure `az login` and point to th
    # Login to azure
    az login
    # Display available subscriptions
-   az account list --output table
+   # az account list --output table
    # Switch to the subscription where we want to work on
    az account set --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
    # Check whether we are on the right subscription
@@ -63,24 +63,26 @@ All these CLI commands require us to login into azure `az login` and point to th
 1. ### Setup reusable variables
 
    ```bash
+   export MSYS_NO_PATHCONV=1
    # ---
    # Main Vars
    # ---
    app="akscni";                                echo $app
    env="prod";                                  echo $env
-   app_rg="rg-$app-$env";                       echo $app_rg
    l="eastus2";                                 echo $l
+   app_rg="rg-$app-$env-$l";                    echo $app_rg
    tags="env=$env app=$app";                    echo $tags
    user_n_test="artiomlk";                      echo $user_n_test
    user_pass_test="Password123!";               echo $user_pass_test
+   sub_id=$(az account show --query id -o tsv); echo $sub_id
 
 
    # ---
    # NETWORK TOPOLOGY
    # ---
-   vnet_pre="172.16";                           echo $vnet_pre
-   vnet_n="vnet-$app-$env";                     echo $vnet_n
-   vnet_addr="$vnet_pre.0.0/16";                echo $vnet_addr
+   vnet_pre="192.168";                          echo $vnet_pre
+   vnet_n="vnet-$app-$env-$l";                  echo $vnet_n
+   vnet_addr="$vnet_pre.0.0/20";                echo $vnet_addr
 
    # ---
    # ACR
@@ -92,12 +94,12 @@ All these CLI commands require us to login into azure `az login` and point to th
    # AKS with CNI
    # ---
    snet_n_aks_cni="snet-$app-aks-cni-$env";     echo $snet_n_aks_cni
-   snet_addr_aks_cni="$vnet_pre.16.0/21";       echo $snet_addr_aks_cni
+   snet_addr_aks_cni="$vnet_pre.0.0/21";        echo $snet_addr_aks_cni
    aks_cluster_n_cni="aks-$app-cni-$env";       echo $aks_cluster_n_cni
    aks_cluster_count_cni="3";                   echo $aks_cluster_count_cni
    aks_node_max_pod_cni="110";                  echo $aks_node_max_pod_cni
    aks_cluster_count="3";                       echo $aks_cluster_count
-   aks_v_cni="1.23.8";                          echo $aks_v_cni
+   aks_v_cni="1.27.3";                          echo $aks_v_cni                  # az aks get-versions --location eastus2 -o table
    aks_node_size_cni="Standard_B2s";            echo $aks_node_size_cni
    aks_id_n_cni="id-$app-aks-cni-$env";         echo $aks_id_n_cni
 
@@ -156,6 +158,7 @@ All these CLI commands require us to login into azure `az login` and point to th
    ```bash
    # Create a resource group where our app resources will be created, e.g. AKS, ACR, vNets...
    az group create \
+   --subscription $sub_id \
    --name $app_rg \
    --location $l \
    --tags $tags
@@ -166,8 +169,9 @@ All these CLI commands require us to login into azure `az login` and point to th
    ```bash
    # Main vNet
    az network vnet create \
-   --name $vnet_n \
+   --subscription $sub_id \
    --resource-group $app_rg \
+   --name $vnet_n \
    --address-prefixes $vnet_addr \
    --location $l \
    --tags $tags
@@ -180,8 +184,9 @@ All these CLI commands require us to login into azure `az login` and point to th
    ```bash
    # Create an ACR
    az acr create \
-   --name "${acr_n}" \
+   --subscription $sub_id \
    --resource-group $app_rg \
+   --name $acr_n \
    --location $l \
    --sku $acr_sku \
    --public-network-enabled true \
@@ -191,10 +196,10 @@ All these CLI commands require us to login into azure `az login` and point to th
 5. ### Create an Azure Kubernetes Service (AKS) with Azure Container Networking Interface (CNI)
 
    1. [Review the Azure CNI Requirements][38]
-   1. [Review Maximum pods per node][39]
-   1. [Create a Resource Group][102]
-   1. [Create a vNet][100]
-   1. Calculate Subnet size
+   2. [Review Maximum pods per node][39]
+   3. [Create a Resource Group][102]
+   4. [Create a vNet][100]
+   5. Calculate Subnet size
       - (number of nodes + 1) + ((number of nodes + 1) \* maximum pods per node that you configure)
         - 50 Nodes Scaling to 60 Nodes (30 max pods per Node)
           - (51) + (51 \* 30) = 1,581 < (2,043 + 5 az) = /21 or larger
@@ -206,6 +211,7 @@ All these CLI commands require us to login into azure `az login` and point to th
    ```bash
    # AKS Subnet
    az network vnet subnet create \
+   --subscription $sub_id \
    --resource-group $app_rg \
    --vnet-name $vnet_n \
    --name $snet_n_aks_cni \
@@ -213,19 +219,20 @@ All these CLI commands require us to login into azure `az login` and point to th
 
    # Create an User Managed Identity
    az identity create \
+   --subscription $sub_id \
    -g $app_rg \
    -n $aks_id_n_cni \
    --tags $tags
 
    # Assign permissions to the User Managed Identity Network Contributor Role to modify vnet as required
-   AKS_CNI_MANAGEDID_SP_ID=$(az identity show --resource-group $app_rg --name $aks_id_n_cni --query principalId --out tsv); echo $AKS_CNI_MANAGEDID_SP_ID
-   VNET_ID=$(az network vnet show --resource-group $app_rg --name $vnet_n --query id -o tsv) ; echo $VNET_ID
+   AKS_CNI_MANAGEDID_SP_ID=$(az identity show --subscription $sub_id --resource-group $app_rg --name $aks_id_n_cni --query principalId --out tsv); echo $AKS_CNI_MANAGEDID_SP_ID
+   VNET_ID=$(az network vnet show --subscription $sub_id --resource-group $app_rg --name $vnet_n --query id -o tsv) ; echo $VNET_ID
    az role assignment create --assignee $AKS_CNI_MANAGEDID_SP_ID --scope $VNET_ID --role "Network Contributor"
 
    # Provide sNet to allocate AKS nodes
-   SNET_AKS_CNI_ID=$(az network vnet subnet show --resource-group $app_rg --vnet-name $vnet_n --name $snet_n_aks_cni --query id -o tsv); echo $SNET_AKS_CNI_ID
+   SNET_AKS_CNI_ID=$(az network vnet subnet show --subscription $sub_id --resource-group $app_rg --vnet-name $vnet_n --name $snet_n_aks_cni --query id -o tsv); echo $SNET_AKS_CNI_ID
    # Attach User Managed Identity by ID to our AKS
-   AKS_CNI_MANAGEDID_ID=$(az identity show --resource-group $app_rg --name $aks_id_n_cni --query id --out tsv); echo $AKS_CNI_MANAGEDID_ID
+   AKS_CNI_MANAGEDID_ID=$(az identity show --subscription $sub_id --resource-group $app_rg --name $aks_id_n_cni --query id --out tsv); echo $AKS_CNI_MANAGEDID_ID
 
    # OPTIONALLY - Attach ACR by ID to our AKS
    # ACR_ID=$(az acr show --name $acr_n --query 'id' --output tsv);   echo $ACR_ID
@@ -270,7 +277,7 @@ All these CLI commands require us to login into azure `az login` and point to th
 7. ### Create a new Application Gateway
 
    1. [Create a Resource Group][102]
-   1. [Create a vNet][100]
+   2. [Create a vNet][100]
 
    ```bash
    #AGIC PIP
@@ -345,8 +352,8 @@ All these CLI commands require us to login into azure `az login` and point to th
 8. ### Enable the AGIC add-on in an existing AKS cluster
 
    1. [If you're using kubenet with Azure Kubernetes Service (AKS) and Application Gateway Ingress Controller (AGIC), you'll need a route table to allow traffic sent to the pods from Application Gateway to be routed to the correct node. This won't be necessary if you use Azure CNI.][41]
-   1. [Create a Public Azure Kubernetes Service (AKS) with Azure Container Networking Interface (CNI)][111]
-   1. [Create a new Application Gateway][113]
+   2. [Create a Public Azure Kubernetes Service (AKS) with Azure Container Networking Interface (CNI)][111]
+   3. [Create a new Application Gateway][113]
 
    ```bash
    # GET APP Gateway RESOURCE ID
@@ -366,7 +373,7 @@ All these CLI commands require us to login into azure `az login` and point to th
 9. ### Create an Azure FrontDoor
 
    1. [Create a Resource Group][102]
-   1. Check FD name availability
+   2. Check FD name availability
       - `az network front-door check-name-availability --name $fd_n --resource-type Microsoft.Network/frontDoors`
 
    ```bash
@@ -425,7 +432,7 @@ All these CLI commands require us to login into azure `az login` and point to th
 11. ### Create AzureDevOps agents
 
     1. [Create a Resource Group][102]
-    1. [Create a vNet][100]
+    2. [Create a vNet][100]
 
     ```bash
     # DevOps NSG with Default rules
@@ -497,7 +504,7 @@ All these CLI commands require us to login into azure `az login` and point to th
 12. ### Create a Bastion agent
 
     1. [Create a Resource Group][102]
-    1. [Create a vNet][100]
+    2. [Create a vNet][100]
 
     ```bash
     # Bastion
@@ -815,7 +822,6 @@ All these CLI commands require us to login into azure `az login` and point to th
 - Others
 - [Git Bash | GitHub | azure cli commands automatically appends git-bash path in the parameter that contains forward slash][1]
 
-[0]: ./azFirewallPremium.md
 [1]: https://github.com/Azure/azure-cli/issues/14299
 [2]: https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/scale-set-agents?view=azure-devops#create-the-scale-set-agent-pool
 [3]: https://docs.microsoft.com/en-us/azure/aks/cluster-container-registry-integration
@@ -864,14 +870,11 @@ All these CLI commands require us to login into azure `az login` and point to th
 [46]: https://techcommunity.microsoft.com/t5/azure-sql/configuring-backup-storage-redundancy-in-azure-sql/ba-p/1554322
 [47]: https://docs.microsoft.com/en-us/azure/azure-sql/database/automated-backups-overview
 [48]: https://docs.microsoft.com/en-us/azure/azure-sql/database/active-geo-replication-overview
-[49s]: https://docs.microsoft.com/en-us/azure/azure-sql/database/auto-failover-group-overview?tabs=azure-powershell#enabling-geo-replication-between-managed-instances-and-their-vnets
 [100]: #create-main-vnet
 [101]: #configure-azure-front-door-custom-domains
 [102]: #create-main-resource-group
 [103]: #connect-to-our-azure-subscription
-[104]: #empty
 [105]: #create-an-azure-container-registry-acr
-[106]: #empty
 [107]: #aks-to-acr-integration
 [108]: #create-azuredevops-agents
 [109]: #create-a-bastion-agent
