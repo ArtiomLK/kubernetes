@@ -1,4 +1,12 @@
 {
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.fontSize": 16,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.markdownlint": "always"
+  },
   "prettier.singleQuote": false,
   "cSpell.words": [
     "clusterroles",
@@ -9,5 +17,23 @@
     "replicasets",
     "rolebinding",
     "serviceaccounts"
-  ]
+  ],
+  "[python]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+  },
+  "[markdown]": {
+    "editor.formatOnPaste": true,
+    "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "files.trimTrailingWhitespace": true,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": true,
+    "scminput": false
+  }
 }

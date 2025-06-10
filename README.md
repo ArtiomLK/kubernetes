@@ -1,11 +1,11 @@
 # kubectl Cheat Sheet
 
-- [`create`](#Create-Command)
-- [`edit`](#Edit-Command)
-- [`get`](#Get-Command)
-- [`describe`](#Describe-Command)
-- [`delete`](#Delete-Command)
-- [`config`](#Config-Command)
+- [`create`](#create-command)
+- [`edit`](#edit-command)
+- [`get`](#get-command)
+- [`describe`](#describe-command)
+- [`delete`](#delete-command)
+- [`config`](#config-command)
 
 ## Create Command
 
@@ -27,7 +27,7 @@
 
 | Command                                     | Description                                     |
 | ------------------------------------------- | ----------------------------------------------- |
-| `kubectl get po \| pods`                    | Lists all pods. [`Common Flags`](#Common-Flags) |
+| `kubectl get po \| pods`                    | Lists all pods. [`Common Flags`](#common-flags) |
 | `kubectl get no \| nodes`                   | Lists all nodes                                 |
 | `kubectl get svc \| services`               | Lists all services in the namespace             |
 | `kubectl get deploy \| deployments`         | Lists deployments                               |
@@ -93,9 +93,9 @@
 | `kubectl port-forward {POD_NAME} 8080:80`                    | Forwards traffic from outside the cluster to the pod    |
 | `{SVC_NAME.NS.svc.cluster.local}`                            | Access a svc from a different namespace                 |
 | `wget -q -O - http://nginx-service-to-deploy`                | Test NetworkPolicy connection from one Pod to a service |
-| `nc -z -v -w 3 <svc-IP> 80`                                  | https://www.computerhope.com/unix/nc.htm                |
+| `nc -z -v -w 3 <svc-IP> 80`                                  | <https://www.computerhope.com/unix/nc.htm>              |
 
-### Common Flags:
+### Common Flags
 
 | Flag               | Examples                                               | Description                                       |
 | ------------------ | ------------------------------------------------------ | ------------------------------------------------- |
@@ -128,7 +128,7 @@
 
 ### Alias
 
-```
+```bash
 alias k="kubectl"
 alias ka="k apply"
 alias kc="k create"
@@ -144,3 +144,7 @@ alias krol="k rollout"
 alias kt="k taint"
 alias ktop="k top"
 ```
+
+### Additional Resources
+
+- [SetUp K8s Cluster](./ClusterSetUp.md)

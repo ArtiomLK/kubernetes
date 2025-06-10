@@ -1,8 +1,8 @@
 # Setting up the K8s Cluster
 
-- [`kubectl`](#Install-kubectl)
-- [`docker`](#Docker)
-- [`minikube`](#Minikube)
+- [`kubectl`](#install-kubectl)
+- [`docker`](#docker)
+- [`minikube`](#minikube-optional)
 
 ## Install-kubectl
 
@@ -11,11 +11,12 @@
 | `brew install kubectl`             | Linux and MacOS (Option1)                              |
 | `snap install kubectl --classic`   | Linux and MacOS (Option2)                              |
 | `choco install kubernetes-cli`     | Windows (Option1)                                      |
-| `scoop install kubectl`            | Windows (Option2)                                      |
+| `scoop install kubectl`            | Windows (Opt   ion2)                                   |
 | `kubectl version --client --short` | Test to ensure the version you installed is up-to-date |
 
 ### Additional info on
 
+- [Installing Chocolatey](https://chocolatey.org/install)
 - [Installing kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - [Managing multiple client kubectl versions with asdf](https://asdf-vm.com/#/)
 
