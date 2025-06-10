@@ -1,0 +1,19 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "features": {},
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "github.copilot",
+        "yzhang.markdown-all-in-one",
+        "davidanson.vscode-markdownlint",
+        "streetsidesoftware.code-spell-checker",
+        "rosshamish.kuskus-kusto-syntax-highlighting",
+        "ms-vscode.vscode-node-azure-pack",
+        "humao.rest-client"
+      ]
+    },
+    "codespaces": {}
+  },
+  "postCreateCommand": "chmod +x .devcontainer/post-create-command.sh && .devcontainer/post-create-command.sh"
+}
